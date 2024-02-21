@@ -116,7 +116,7 @@ function App() {
       
       if(index <= counter){
 
-        for (let i = 0; i <= 7; i++) {
+        for (let i = 0; i < 8; i++) {
     
           console.log(await obj[i].array());
 
@@ -215,7 +215,6 @@ function App() {
       }
       */
       
-     console.log(labels);
      if (boxesIndexisCompleted && classesIndexisCompleted && scoresIndexisCompleted) {
       updateBoxesStatus(true);
       // console.log(boxesIndex,classesIndex,scoresIndex);
@@ -241,6 +240,10 @@ function App() {
   };
 
   useEffect(()=>{runCoco()},[]);
+
+  useEffect(() => {
+    console.log(labels);
+  }, [labels]);
 
   return (
     <LabelContext.Provider value={{ labels }}>
