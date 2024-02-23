@@ -41,6 +41,16 @@ function App() {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [boxesAssigned, setBoxesAssigned] = useState(false);
 
+  const [intervalId, setIntervalId] = useState(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [intervalId]);
+
   const updateModelStatus = (status) => {
     setModelLoaded(status);
   };
@@ -65,7 +75,7 @@ function App() {
   let scoresIndex = 0;
 
   // Main function Eine Funktion, die ein TensorFlow-Modell lädt und eine Schleife startet, um Vorhersagen zu machen.
-  const runCoco = async () => {
+  const runCoco = async (currenntLabels) => {
     try {
       // 3. TODO - Load network 
       const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');
@@ -74,11 +84,19 @@ function App() {
       if (!net) {
         throw new Error('Failed to load the model.');
       }
+
+      // Clear any previous intervals
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
   
       // Loop and detect hands Eine Funktion, die überprüft, ob Daten verfügbar sind, und dann das Modell verwendet, um Vorhersagen auf dem aktuellen Bild der Webcam zu machen. Sie zeichnet auch die Vorhersagen auf einem Canvas.
-      setInterval(() => {
-        detect(net);
+      const newIntervalID = setInterval(() => {
+        detect(net, currenntLabels);
       }, 16.7);
+
+      // Setup the new interval and save the interval ID
+      setIntervalId(newIntervalID);
     } catch (error) {
       console.error('Error loading the model:', error);
       console.log(modelIsLoaded);
@@ -87,7 +105,7 @@ function App() {
   
 
 
-  const detect = async (net) => {
+  const detect = async (net, currenntLabels) => {
     // Check data is available
     if (
       typeof webcamRef.current !== "undefined" &&
@@ -227,7 +245,7 @@ function App() {
 
       // 5. TODO - Update drawing utility
       // drawSomething(obj, ctx)
-        requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], 0.4, videoWidth, videoHeight, ctx, labels)}); 
+        requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], 0.4, videoWidth, videoHeight, ctx, currenntLabels)}); 
       }  
 
       tf.dispose(img)
@@ -239,7 +257,16 @@ function App() {
     }
   };
 
-  useEffect(()=>{runCoco()},[]);
+  useEffect(() => {
+    runCoco(labels);
+    
+    // Cleanup interval when labels change
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [labels]);
 
   useEffect(() => {
     console.log(labels);
