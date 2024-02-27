@@ -22,6 +22,10 @@ function StatusIndicator({ label, status }) {
   );
 }
 
+const VIDEO_WIDTH = 640;
+const VIDEO_HEIGHT = 480;
+const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
+
 function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -32,10 +36,12 @@ function App() {
   });
 
   const changeColor = (index, newColor) => {
+    if (newColor && newColor.trim() !== "") {  
     setLabels(prevLabels => ({
-      ...prevLabels,
-      [index]: { ...prevLabels[index], color: newColor }
-    }));
+        ...prevLabels,
+        [index]: { ...prevLabels[index], color: newColor }
+      }));
+    }
   };  
 
   const [modelLoaded, setModelLoaded] = useState(false);
@@ -93,7 +99,7 @@ function App() {
       // Loop and detect hands Eine Funktion, die überprüft, ob Daten verfügbar sind, und dann das Modell verwendet, um Vorhersagen auf dem aktuellen Bild der Webcam zu machen. Sie zeichnet auch die Vorhersagen auf einem Canvas.
       const newIntervalID = setInterval(() => {
         detect(net, currenntLabels);
-      }, 16.7);
+      }, DETECTION_INTERVAL);
 
       // Setup the new interval and save the interval ID
       setIntervalId(newIntervalID);
@@ -162,76 +168,6 @@ function App() {
       index++;
       }
     }
-    
-      
-      /*
-      if(!test1isCompleted && !test2isCompleted && !test3isCompleted)
-      {
-        for (let index = 0; index <= 6; index++) {
-          const currentArrayData = await obj[index]?.array();
-          
-          if (currentArrayData) {
-            const currentArray = currentArrayData[0]?.[0];
-        
-            if (currentArray) {
-              if (currentArray.length === 4 && currentArray.every((value) => value >= 0 && value <= 1 && !test1isCompleted)) {
-                // Bedingung für Boxes: 4 Einträge zwischen 0 und 1
-                console.log("Boxes:", currentArray, index);
-                test1isCompleted = true;
-              } else if (currentArray.length === 1 && Number.isInteger(currentArray[0]) && !test2isCompleted) {
-                // Bedingung für Classes: einen Eintrag und nur ganzzahlige Zahlen
-                console.log("Classes:", classes, index);
-                test2isCompleted = true;
-              } else if (currentArray.length === 1 && currentArray[0] >= 0 && currentArray[0] <= 1 && !test3isCompleted) {
-                // Bedingung für Scores: einen Eintrag zwischen 0 und 1
-                console.log("Scores:", scores, index);
-                test3isCompleted = true;
-              } else {
-                console.log(`Invalid currentArray structure for index ${index}:`, currentArray);
-              }
-            } else {
-              console.log(`currentArray is undefined for index ${index}`);
-            }
-          } else {
-            console.log(`Data for index ${index} is undefined`);
-          }
-        }
-      }
-      */
-
-      /*
-      for (let index = 0; index <= 6; index++) {
-        const currentArrayData = await obj[index]?.array();
-        
-        if (currentArrayData) {
-          const currentArray = currentArrayData[0]?.[0];
-      
-          if (currentArray) {
-            if (currentArray.length === 4 && currentArray.every((value) => value >= 0 && value <= 1)) {
-              // Bedingung für Boxes: 4 Einträge zwischen 0 und 1
-              console.log("Boxes:", currentArray, index);
-              // Hier kannst du weiter mit den Boxes arbeiten...
-            } else if (currentArray.length === 1 && Number.isInteger(currentArray[0])) {
-              // Bedingung für Classes: einen Eintrag und nur ganzzahlige Zahlen
-              const classes = currentArray;
-              console.log("Classes:", classes, index);
-              // Hier kannst du weiter mit den Classes arbeiten...
-            } else if (currentArray.length === 1 && currentArray[0] >= 0 && currentArray[0] <= 1) {
-              // Bedingung für Scores: einen Eintrag zwischen 0 und 1
-              const scores = currentArray;
-              console.log("Scores:", scores, index);
-              // Hier kannst du weiter mit den Scores arbeiten...
-            } else {
-              console.log(`Invalid currentArray structure for index ${index}:`, currentArray);
-            }
-          } else {
-            console.log(`currentArray is undefined for index ${index}`);
-          }
-        } else {
-          console.log(`Data for index ${index} is undefined`);
-        }
-      }
-      */
       
      if (boxesIndexisCompleted && classesIndexisCompleted && scoresIndexisCompleted) {
       updateBoxesStatus(true);
@@ -275,43 +211,28 @@ function App() {
   return (
     <LabelContext.Provider value={{ labels }}>
     <div className="App">
-      <header className="App-header">
+      <div className="Header">
+      </div>
+      <div className="LiveFeed">
         <Webcam
           ref={webcamRef}
           muted={true} 
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zindex: 9,
-            width: 640,
-            height: 480,
-          }}
+          className="webcamStyle"
         />
-
         <canvas
           ref={canvasRef}
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zindex: 8,
-            width: 640,
-            height: 480,
-          }}
+          className="canvasStyle"
         />
-        <div className="StatusIndicatorHelper">
-          <StatusIndicator label="Model" status={modelLoaded} />
-          <StatusIndicator label="Boxes Assigned" status={boxesAssigned} />
-        </div>
+      </div>
+      <div className="StatusIndicator">
+        <StatusIndicator label="Model" status={modelLoaded} />
+        <StatusIndicator label="Boxes Assigned" status={boxesAssigned} />
+      </div>
+      <div className="LabelList">
         <LabelList changeColor={changeColor}/>
-      </header>
+      </div>
+      <div className="Footer">
+      </div>
     </div>
     </LabelContext.Provider>
   );

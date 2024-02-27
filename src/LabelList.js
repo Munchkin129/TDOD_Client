@@ -6,7 +6,9 @@ function LabelList({ changeColor }) {
   
     const handleClick = (index) => {
       const newColor = prompt('Bitte geben Sie eine neue Farbe ein:');
-      changeColor(index, newColor);
+      if (newColor && newColor.trim() !== "") {
+        changeColor(index, newColor);
+      }
     };
   
     return (

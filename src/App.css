@@ -1,59 +1,80 @@
-.App {
+.App {  
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 1fr 2fr 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "Header Header Header"
+    "StatusIndicator LiveFeed LabelList"
+    "Footer Footer Footer";
   text-align: center;
-  position: relative;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  position: relative;
+  justify-content: center;
   background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: row;
-  align-items: center; /* Zentriert die Elemente vertikal */
-  justify-content: space-around; /* Verteilt die Elemente gleichmäßig mit Platz dazwischen */
-  padding: 20px; /* Fügt Platz um die Ränder hinzu */
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100vh;
 }
 
-.StatusIndicatorHelper {
+.Header { grid-area: Header; }
+
+.LiveFeed {
+  grid-area: LiveFeed; 
+  position: relative;
+}
+
+.webcamStyle, .canvasStyle {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+  width: 640px;
+  height: 480px;
+}
+
+.webcamStyle {
+  z-index: 8;
+}
+
+.canvasStyle {
+  z-index: 9;
+}
+
+.StatusIndicator {
+  grid-area: StatusIndicator; 
   display: flex;
   flex-direction: column;
   z-index: 10;
 }
 
+.LabelList { 
+  grid-area: LabelList;
+}
+
+.Footer { grid-area: Footer; }
+
+.LabelButton {
+  padding: 10px 20px;
+  margin: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px; 
+  cursor: pointer; 
+  background-color: #f8f8f8; 
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: background-color 0.3s; 
+}
+
+.LabelButton:hover {
+  background-color: #ececec; 
+}
+
 .label-list {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Ausrichtung der Labels am Anfang */
-  padding: 10px; /* Fügt etwas Platz um die Labels herum hinzu */
+  padding: 10px; 
 }
 
 .label-list div {
-  cursor: pointer; /* Ändert den Mauszeiger, wenn Sie über ein Label fahren */
-  margin-bottom: 5px; /* Fügt etwas Platz zwischen den Labels hinzu */
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  cursor: pointer; 
+  margin-bottom: 5px; 
 }
