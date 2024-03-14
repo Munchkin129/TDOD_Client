@@ -22,8 +22,11 @@ In jupyter Notebooks
 
 1. Sammeln und Labeln der Bilder
 
-2. Trainieren des Model
+2. Trainieren des Models
   in zwei Bereiche einteilen Training/Testing
+
+3. Auswertung des Models
+   Änderungen des Models durch Veränderung der Anzahl der Bilder, Steps, etc möglich
 
 <details>
 <summary>Webseite schreiben und Model anbinden</summary>
