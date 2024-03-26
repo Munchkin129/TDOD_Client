@@ -6,13 +6,13 @@
 <ol>
 <li><strong>Dependencies installieren</strong></li>
   <p>In der Konsole: <br>
-  npm install</p>
+  <pre>npm install</pre></p>
 <li><strong>Webseite starten</strong></li>
   <p>In der Konsole: <br>
-  npm start</p>
+  <pre>npm start </pre></p>
 <li><strong>Model lokal hosten</strong></li>
   <p>In den Ordner des zu hostenden Models gehen, Konsole öffnen und http Server starten:<br>
-    http-server -c1 --cors .</p>
+    <pre>http-server -c1 --cors .</pre></p>
 </ol>
 </details>
 
@@ -31,7 +31,11 @@ Für das Labeln der Bilder wurde LabelImg benutzt. Dies bietet ein leicht verst�
 
 3. Trainieren des Models mittels Tensorflow
 Voraussetzung für das Tranieren ist die Installation von 'Tensorflow Object Detection'.
-Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network installiert. Somit wird nicht nur auf der CPU traniert und der Prozess verschnellert sich. 
+Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network installiert. Somit wird nicht nur auf der CPU traniert und der Prozess verschnellert sich.
+Der Entwicklungsprozess wurde durch den Einsatz des vortrainierten und bewährter TensorFlow Zoo Modell 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8' erheblich beschleunigt.
+Als nächstes wurde die LabelMap angelegt. Diese dient er klaren Zuordnung zwischen numerischen ID´s und den angelegten Labeln. Dies vereinfacht die Interpretation der Ergebnisse.
+Für die Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien Training und Test eingeteilt.
+Das Modell wird nun auf den Trainingsdateien TODOOOOOOOOOO
 
 5. Auswertung des Models
    Änderungen des Models durch Veränderung der Anzahl der Bilder, Steps, etc möglich
