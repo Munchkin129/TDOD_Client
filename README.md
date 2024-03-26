@@ -1,3 +1,5 @@
+## Praxisprojekt Object Detection mit Webseitenanbindung
+
 ## Starten der Webseite und des Models
 <details open>
 <summary> </summary>
@@ -14,22 +16,28 @@
 </ol>
 </details>
 
-## Praxisprojekt Object Detection mit Webseitenanbindung
+## Durchführung der einzelnen Schritte
 <details>
-<summary>Tranieren des Tensorflow Model</summary>
+<summary>1. Tranieren des Tensorflow Model</summary>
 </details>
-In jupyter Notebooks
+1. Installation und Setup
+Für das Trainieren eines eigenen Tensorflow Models muss zuerst eine Basis geschaffen werden.
+In dieserm Projekt verwende ich eine virtuelle Umgebung und jupyter Notebooks mit Python als diese.
+Die virtuelle Umgebung gibt uns den Vorteil, TODO
 
-1. Sammeln und Labeln der Bilder
+2. Sammeln und Labeln der Bilder
+Ich habe mich dafür entschieden die Webcam meines Laptops für das aufzeichnen der Bilder zu benutzen.
+Für das Labeln der Bilder wurde LabelImg benutzt. Dies bietet ein leicht verständliches Interface mit leicht zu lernender Bedienung.
 
-2. Trainieren des Models
-  in zwei Bereiche einteilen Training/Testing
+3. Trainieren des Models mittels Tensorflow
+Voraussetzung für das Tranieren ist die Installation von 'Tensorflow Object Detection'.
+Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network installiert. Somit wird nicht nur auf der CPU traniert und der Prozess verschnellert sich. 
 
-3. Auswertung des Models
+5. Auswertung des Models
    Änderungen des Models durch Veränderung der Anzahl der Bilder, Steps, etc möglich
 
 <details>
-<summary>Webseite schreiben und Model anbinden</summary>
+<summary>2. Webseite schreiben und Model anbinden</summary>
 </details>
 
 1. Model hosten
@@ -45,5 +53,5 @@ In jupyter Notebooks
 
 
 <details>
-<summary>Projekt in einen Docker Container umsiedeln</summary>
+<summary>3. Projekt in einen Docker Container umsiedeln</summary>
 </details>
