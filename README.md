@@ -20,6 +20,7 @@
 <details>
 <summary>1. Tranieren des Tensorflow Model</summary>
 </details>
+
 1. Installation und Setup
 Für das Trainieren eines eigenen Tensorflow Models muss zuerst eine Basis geschaffen werden.
 In dieserm Projekt verwende ich eine virtuelle Umgebung und jupyter Notebooks mit Python als diese.
@@ -35,10 +36,22 @@ Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network 
 Der Entwicklungsprozess wurde durch den Einsatz des vortrainierten und bewährter TensorFlow Zoo Modell 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8' erheblich beschleunigt.
 Als nächstes wurde die LabelMap angelegt. Diese dient er klaren Zuordnung zwischen numerischen ID´s und den angelegten Labeln. Dies vereinfacht die Interpretation der Ergebnisse.
 Für die Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien Training und Test eingeteilt.
-Das Modell wird nun auf den Trainingsdateien TODOOOOOOOOOO
+Das Modell wird nun auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Modells in der Praxis.
 
-5. Auswertung des Models
-   Änderungen des Models durch Veränderung der Anzahl der Bilder, Steps, etc möglich
+4. Auswertung des Models
+Die Auswertung des Models erfolgt mittels Tensorboard. Dies ermöglicht eine Visualisierung verschiedener Kategorien und ein schnelleres Verständnis anhand Skalenwerten.
+Hervorzuheben sind Precision und Recall.
+Precision gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
+Recall misst, welcher Anteil der tatsächlichen positiven Fälle vom Modell korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
+Der F1-Score ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Modells, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
+
+Diesen Prozess habe ich iterativ durchlaufen und an folgende Stellschrauben verändert:
+
+Anzahl und Art der Bilder
+Trainingsteps
+Aufteilung der Trainings und Test Kategorie
+
+Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recall nehmen.
 
 <details>
 <summary>2. Webseite schreiben und Model anbinden</summary>
