@@ -40,18 +40,42 @@ Das Modell wird nun auf den Trainingsdateien generiert und anhand der Testbilder
 
 4. Auswertung des Models
 Die Auswertung des Models erfolgt mittels Tensorboard. Dies ermöglicht eine Visualisierung verschiedener Kategorien und ein schnelleres Verständnis anhand Skalenwerten.
-Hervorzuheben sind Precision und Recall.
+Hervorzuheben sind Precision, Recall und der F1-Score.
 Precision gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
 Recall misst, welcher Anteil der tatsächlichen positiven Fälle vom Modell korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
 Der F1-Score ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Modells, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
 
-Diesen Prozess habe ich iterativ durchlaufen und an folgende Stellschrauben verändert:
+Auf welche Metriken haben wir Einfluss:
 
-Anzahl und Art der Bilder
-Trainingsteps
-Aufteilung der Trainings und Test Kategorie
+
+Anzahl und Art der Bilder: Ändern der Position der Hände, Neigen der Hände, verschiedene Lichteinstellungen, Distanz zur Kamera ändern.
+Trainingsteps: Änderung der Anzahl, bei mehr Steps dauert das Training länger
+Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung ändern
+
+|               | Precision       | Recall        | F1-Score      | 
+|:------------: |:---------------:| :------------:| :------------:|
+| Model_v0      | Cell 2          | Cell 3        |               |
+| Model_v1      | Cell 5          | Cell 6        |               |
+| Model_v2      | Cell 8          | Cell 9        |               |
+| Model_v3      | Cell 8          | Cell 9        |               |
 
 Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recall nehmen.
+
+|               | Anzahl Bilder   | Aufteilung Training/Test | Trainingssteps      | 
+|:------------: |:---------------:| :-----------------------:| :------------------:|
+| Model_v0      | Cell 2          | Cell 3                   |                     |
+| Model_v1      | Cell 5          | Cell 6                   |                     |
+| Model_v2      | Cell 8          | Cell 9                   |                     |
+| Model_v3      | Cell 8          | Cell 9                   |                     |
+
+5. Testen des Models anhand Bildern und Livevideo
+
+6. Wiederholung der vorherigen Schritte und Anpassungen vornhemen.
+Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat. Mehr Bilder oder mehr Trainingssteps bedeuten nicht automatisch eine Verbesserung.
+
+7. Exportieren des Models
+Um das Model nun in anderen Umgebungen nutzen möchte muss dieses zunächst eingefroren und dann exportiert werden.
+TODO zu Tensorflow JS
 
 <details>
 <summary>2. Webseite schreiben und Model anbinden</summary>
