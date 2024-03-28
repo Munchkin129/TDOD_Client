@@ -40,6 +40,9 @@ Das Modell wird nun auf den Trainingsdateien generiert und anhand der Testbilder
 
 4. Auswertung des Models
 Die Auswertung des Models erfolgt mittels Tensorboard. Dies ermöglicht eine Visualisierung verschiedener Kategorien und ein schnelleres Verständnis anhand Skalenwerten.
+Tensorboard kann mit folgedem Befehl innerhalb des /eval Ordners geöffnet werden
+<pre>tensorboard --logdir=.</pre>
+Alternativ kann auch ein Command zur Bewertung genutzt werden.
 Hervorzuheben sind Precision, Recall und der F1-Score.
 Precision gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
 Recall misst, welcher Anteil der tatsächlichen positiven Fälle vom Modell korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
@@ -54,19 +57,19 @@ Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung änd
 
 |               | Precision       | Recall        | F1-Score      | 
 |:------------: |:---------------:| :------------:| :------------:|
-| Model_v0      | Cell 2          | Cell 3        |               |
-| Model_v1      | Cell 5          | Cell 6        |               |
-| Model_v2      | Cell 8          | Cell 9        |               |
-| Model_v3      | Cell 8          | Cell 9        |               |
+| Model_v0      |          0.7    |          0.7  |               |
+| Model_v1      |    0.6609       |    0.6667     |               |
+| Model_v2      | 0.7024          |  0.7215       |               |
+| Model_v3      |          0.8089 |        0.8256 |               |
 
 Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recall nehmen.
 
 |               | Anzahl Bilder   | Aufteilung Training/Test | Trainingssteps      | 
 |:------------: |:---------------:| :-----------------------:| :------------------:|
-| Model_v0      | Cell 2          | Cell 3                   |                     |
-| Model_v1      | Cell 5          | Cell 6                   |                     |
-| Model_v2      | Cell 8          | Cell 9                   |                     |
-| Model_v3      | Cell 8          | Cell 9                   |                     |
+| Model_v0      | Cell 2          | Cell 3                   |           2000      |
+| Model_v1      | Cell 5          | Cell 6                   |           2000      |
+| Model_v2      | Cell 8          | Cell 9                   |               2000  |
+| Model_v3      | 84              |  59/25       ~70/30%     |            10000    |
 
 5. Testen des Models anhand Bildern und Livevideo
 
