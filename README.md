@@ -61,6 +61,7 @@ Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung änd
 | Model_v1      |    0.6609       |    0.6667     |               |
 | Model_v2      | 0.7024          |  0.7215       |               |
 | Model_v3      |          0.8089 |        0.8256 |               |
+| Model_v4      |          0.0000 |        0.0000 |               |
 
 Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recall nehmen.
 
@@ -70,6 +71,7 @@ Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recal
 | Model_v1      | Cell 5          | Cell 6                   |           2000      |
 | Model_v2      | Cell 8          | Cell 9                   |               2000  |
 | Model_v3      | 84              |  59/25       ~70/30%     |            10000    |
+| Model_v4      | 114             |  79/35       ~70/30%     |            10000    |
 
 5. Testen des Models anhand Bildern und Livevideo
 
