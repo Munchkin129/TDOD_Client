@@ -55,32 +55,38 @@ Anzahl und Art der Bilder: Ändern der Position der Hände, Neigen der Hände, v
 Trainingsteps: Änderung der Anzahl, bei mehr Steps dauert das Training länger
 Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung ändern
 
-|               | Precision       | Recall        | F1-Score      | 
-|:------------: |:---------------:| :------------:| :------------:|
-| Model_v0      |          0.7    |          0.7  |               |
-| Model_v1      |    0.6609       |    0.6667     |               |
-| Model_v2      | 0.7024          |  0.7215       |               |
-| Model_v3      |          0.8089 |        0.8256 |               |
-| Model_v4      |          0.0000 |        0.0000 |               |
+|               | Precision       | Recall        | F1-Score       | 
+|:-------------:|:---------------:|:-------------:|:--------------:|
+| Model_v0      | 0.7             | 0.7           | 0.7            |
+| Model_v1      | 0.6609          | 0.6667        | 0.6638         |
+| Model_v2      | 0.7024          | 0.7215        | 0.7118         |
+| Model_v3      | 0.8089          | 0.8256        | 0.8172         |
+| Model_v4      | 0.7859          | 0.8082        | 0.7969         |
+
 
 Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recall nehmen.
 
 |               | Anzahl Bilder   | Aufteilung Training/Test | Trainingssteps      | 
 |:------------: |:---------------:| :-----------------------:| :------------------:|
-| Model_v0      | Cell 2          | Cell 3                   |           2000      |
-| Model_v1      | Cell 5          | Cell 6                   |           2000      |
-| Model_v2      | Cell 8          | Cell 9                   |               2000  |
-| Model_v3      | 84              |  59/25       ~70/30%     |            10000    |
-| Model_v4      | 114             |  79/35       ~70/30%     |            10000    |
+| Model_v0      | 9               | 6/3        ~67/33%       | 2000                |
+| Model_v1      | 41              | 33/8       ~80/20%       | 2000                |
+| Model_v2      | 73              | 53/20      ~73/27%       | 2000                |
+| Model_v3      | 84              | 59/25      ~70/30%       | 10000               |
+| Model_v4      | 114             | 79/35      ~70/30%       | 10000               |
 
 5. Testen des Models anhand Bildern und Livevideo
+In 
 
 6. Wiederholung der vorherigen Schritte und Anpassungen vornhemen.
 Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat. Mehr Bilder oder mehr Trainingssteps bedeuten nicht automatisch eine Verbesserung.
 
 7. Exportieren des Models
 Um das Model nun in anderen Umgebungen nutzen möchte muss dieses zunächst eingefroren und dann exportiert werden.
-TODO zu Tensorflow JS
+Da die Webseite auf Node.js basiert, wird das Model nach Tensorflow.js(tfjs) exportiert.
+Dies sieht hat folgende Strukur:
+![model.json und shards](/Pfad/zum/Bild.jpg)
+Die model.json Datei definiert die Struktur eines TensorFlow.js Modells, und die group1-shardXof3.bin Dateien enthalten die aufgeteilten Gewichte des Modells für effizientes Laden und Hosting-Kompatibilität.
+
 
 <details>
 <summary>2. Webseite schreiben und Model anbinden</summary>
@@ -90,6 +96,8 @@ TODO zu Tensorflow JS
    mehrere Möglichkeiten, habe mich zum lokalen hosten entschieden mittels http server (https://www.npmjs.com/package/http-server)
    individuelle Challenge: jedes geladene Model sendet 8 Arrays in verschiedener Reihenfolge
    Wir brauchen Boxes, Classes und Scores und müssen diese richtig zuordnen. Dafür habe ich einen Algorithmus geschrieben
+   
+Beim Laden des Modells im Client-Browser wird zuerst die model.json-Datei abgerufen, um die Modellstruktur zu konstruieren. Anschließend werden die zugehörigen Gewichte aus den .bin-Dateien geladen, um das Modell zu vervollständigen und inferenzbereit zu machen.
 
 3. Webcam für live Feed
 
