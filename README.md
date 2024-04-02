@@ -75,16 +75,23 @@ Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recal
 | Model_v4      | 114             | 79/35      ~70/30%       | 10000               |
 
 5. Testen des Models anhand Bildern und Livevideo
-In 
+Um nun praktisch zu sehen wie sich das tranierte Model verhält, können entweder einzellne Bilder geladen und auf diese wird dann das erkannte mit Gewichtung gezeichnet.
+So können Rückschlüsse auf das Model genommen werden. Folgende zwei Bilder kamen in der Model_v4 Iteration dazu. Bei einem wird der Daumen nach unten erkannt, bei dem anderen nicht.
+![Erkannt](/documentation/pictures/testModelv4ThmubsDownMatch.png)
+![Nicht erkannt](/documentation/pictures/testModelv4ThmubsDownNoMatch.png)
 
-6. Wiederholung der vorherigen Schritte und Anpassungen vornhemen.
+Alternativ kann auch ein Livevideo über die Webcam gestartet werden um Live Auswertungen zu bekommen.
+Hier kann getestet werden, wie schnell das System die Handgesten erkennt.
+
+
+7. Wiederholung der vorherigen Schritte und Anpassungen vornhemen.
 Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat. Mehr Bilder oder mehr Trainingssteps bedeuten nicht automatisch eine Verbesserung.
 
-7. Exportieren des Models
+8. Exportieren des Models
 Um das Model nun in anderen Umgebungen nutzen möchte muss dieses zunächst eingefroren und dann exportiert werden.
 Da die Webseite auf Node.js basiert, wird das Model nach Tensorflow.js(tfjs) exportiert.
-Dies sieht hat folgende Strukur:
-![model.json und shards](/Pfad/zum/Bild.jpg)
+Dies sieht hat folgende Strukur: 
+![model.json und shards](/documentation/pictures/tfjsexport.png)
 Die model.json Datei definiert die Struktur eines TensorFlow.js Modells, und die group1-shardXof3.bin Dateien enthalten die aufgeteilten Gewichte des Modells für effizientes Laden und Hosting-Kompatibilität.
 
 
