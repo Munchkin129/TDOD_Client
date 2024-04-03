@@ -21,14 +21,160 @@
 <summary>1. Tranieren des Tensorflow Model</summary>
 </details>
 
+# TensorFlow Modell Trainingsdokumentation
+
+Diese Dokumentation beschreibt den Prozess des Trainierens eines TensorFlow-Modells, von der Einrichtung der Entwicklungsumgebung über das Sammeln von Bildern bis hin zum Export des Modells für die Verwendung in unterschiedlichen Umgebungen.
+
+## 1. Einrichtung der Entwicklungsumgebung
+
+Zu Beginn wird eine virtuelle Umgebung erstellt, um Paketkonflikte zu vermeiden. Das komplette Training findet in jupyter Notebook statt.
+Eine virtuelle Umgebung wird erstellt, und die notwendigen Abhängigkeiten werden installiert, um eine stabile Entwicklungsumgebung sicherzustellen.
+
+<pre>
+!pip install opencv-python
+import cv2
+import uuid
+import os
+import time
+</pre>
+
+## 2. Sammeln und Labeln der Bilder
+
+Hier werden die Labels festgelegt. Es werden Bilder von zwei Handgesten ("Daumen hoch" und "Daumen runter") gesammelt. Die Bilder werden mit der integrierten Webcam des Laptops aufgenommen.
+*number_imgs* gibt an, wie viele Bilder aufgenommen werden sollen.
+
+<pre>
+labels = ['thumbsup', 'thumbsdown']
+number_imgs = 5
+</pre>
+
+## 3. Ordnerstruktur vorbereiten
+
+Ein spezifischer Ordnerpfad für die gesammelten Bilder wird erstellt. Bei Bedarf werden die entsprechenden Verzeichnisse angelegt.
+
+<pre>
+IMAGES_PATH = os.path.join('Tensorflow', 'workspace', 'images', 'collectedimages')
+if not os.path.exists(IMAGES_PATH):
+    if os.name == 'posix':
+        !mkdir -p {IMAGES_PATH}
+    elif os.name == 'nt':
+        !mkdir {IMAGES_PATH}
+
+for label in labels:
+    path = os.path.join(IMAGES_PATH, label)
+    if not os.path.exists(path):
+        !mkdir {path}
+</pre>
+
+Daraus resultiert diese übersichtliche Struktur:
+![folder structure](/documentation/pictures/folderstructure.png)
+
+## 4. Bilderfassung
+
+Die Webcam wird verwendet, um die Bilder für jede Geste aufzunehmen. Dabei wird für jedes Label die angegebene Anzahl an Bilder aufgezeichnet und mittels einer einzigartig generierten UUID als Name abgespeichert.
+
+<pre>
+for label in labels:
+    cap = cv2.VideoCapture(0)
+    print('Collecting images for {}'.format(label))
+    time.sleep(5)
+    for imgnum in range(number_imgs):
+        print('Collecting image {}'.format(imgnum))
+        ret, frame = cap.read()
+        imgname = os.path.join(IMAGES_PATH,label,label+'.'+'{}.jpg'.format(str(uuid.uuid1())))
+        cv2.imwrite(imgname, frame)
+        cv2.imshow('frame', frame)
+        time.sleep(2)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+cap.release()
+cv2.destroyAllWindows()
+</pre>
+
+## 5. Bilder beschriften
+
+Das Tool [LabelImg](https://pypi.org/project/labelImg/) wird installiert und verwendet, um die Bilder zu beschriften und die entsprechenden Label-Daten vorzubereiten.
+LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bildern, das die Erstellung von Trainingsdaten für Bilderkennungsmodelle erleichtert.
+
+<pre>
+!pip install --upgrade pyqt5 lxml
+</pre>
+
+## 6. Vorbereitung des Trainings
+
+Vor der Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien **Training** und **Test** eingeteilt.
+Das Modell wird auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Modells in der Praxis.
+
+Als nächstes werden notwendigen Pfade und Dateinamen für das Modelltraining werden festgelegt. Dazu gehören Arbeitsverzeichnisse, Skripte, API-Modelle, Annotationen und Bilder sowie Pfade für die vorab trainierten Modelle.
+
+<pre>
+CUSTOM_MODEL_NAME = 'my_ssd_mobnet' 
+PRETRAINED_MODEL_NAME = 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8'
+PRETRAINED_MODEL_URL = 'http://download.tensorflow.org/models/object_detection/tf2/20200711/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8.tar.gz'
+</pre>
+
+Bei *PRETRAINED_MODEL_NAME* handelt es sich um ein vortrainiertes und bewährtes TensorFlow Zoo Model. Durch den Einsatz dieses wird der Entwicklungsprozess erheblich beschleunigt. 
+
+## 7. Modelltraining
+
+Vor Beginn wird [CUDA Deep Neutral Network](https://developer.nvidia.com/cuda-toolkit) installiert. Dies ermöglicht es auf der GPU zu trainieren. Die richtige CUDA Version hängt von der Tensorflow Version ab und kann [hier](https://www.tensorflow.org/install/source_windows) nachgeschaut werden. 
+
+Das Modell wird mit den definierten Einstellungen und Parametern trainiert. Ein vorab trainiertes Modell aus dem TensorFlow Model Zoo wird beschleunigt, um den Entwicklungsprozess zu verkürzen.
+WEITER
+<pre>
+!python model_main_tf2.py --model_dir=models/my_ssd_mobnet --pipeline_config_path=models/my_ssd_mobnet/pipeline.config
+</pre>
+
+## 8. Modellauswertung
+
+Die Modellleistung wird anhand von Metriken wie Precision, Recall und dem F1-Score bewertet. TensorBoard wird verwendet, um die Trainingsfortschritte und Modellleistungen zu visualisieren.
+
+<pre>
+precision = 0.7859           
+recall = 0.8082
+f1_score = 2 * (precision * recall) / (precision + recall)
+print(f'F1 Score: {f1_score}')
+</pre>
+
+## 9. Modell laden und Testbilder auswerten
+
+Das trainierte Modell wird geladen und mit Testbildern ausgewertet, um die Leistung zu beurteilen.
+
+<pre>
+# Code für das Laden des Modells und die Anwendung auf Testbilder
+</pre>
+
+## 10. Live-Erkennung mit der Webcam
+
+Das Modell wird in Echtzeit mit einer Webcam getestet, um die Reaktionsgeschwindigkeit und Erkennungsgenauigkeit zu überprüfen.
+
+<pre>
+# Code für die Live-Erkennung mit der Webcam
+</pre>
+
+## 11. Modell-Export
+
+Das Modell wird exportiert, um es in anderen Umgebungen nutzen zu können, wie z.B. in einer auf Node.js basierten Webseite. In diesem Fall zu TensorFlow.js.
+
+<pre>
+!pip install tensorflowjs
+# Befehl zum Konvertieren des Modells in das TensorFlow.js-Format
+</pre>
+
+## 12. Modellkonvertierung für TFLite
+
+Das Modell kann im Anschluss noch für mobile Geräte in TensorFlow Lite konvertiert werden, um eine breitere Anwendbarkeit zu ermöglichen.
+
+<pre>
+# Befehle für die Konvertierung des Modells in das TFLite-Format
+</pre>
+
+
 1. Installation und Setup
 Für das Trainieren eines eigenen Tensorflow Models muss zuerst eine Basis geschaffen werden.
 In dieserm Projekt verwende ich eine virtuelle Umgebung und jupyter Notebooks mit Python als diese.
-Die virtuelle Umgebung gibt uns den Vorteil, TODO
-
-2. Sammeln und Labeln der Bilder
-Ich habe mich dafür entschieden die Webcam meines Laptops für das aufzeichnen der Bilder zu benutzen.
-Für das Labeln der Bilder wurde LabelImg benutzt. Dies bietet ein leicht verständliches Interface mit leicht zu lernender Bedienung.
+Die virtuelle Umgebung gibt uns den Vorteil
 
 3. Trainieren des Models mittels Tensorflow
 Voraussetzung für das Tranieren ist die Installation von 'Tensorflow Object Detection'.
