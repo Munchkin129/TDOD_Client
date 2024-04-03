@@ -1,4 +1,4 @@
-## Praxisprojekt Object Detection mit Webseitenanbindung
+# Praxisprojekt Object Detection mit Webseitenanbindung
 
 ## Starten der Webseite und des Models
 <details open>
@@ -18,14 +18,13 @@
 
 ## Durchführung der einzelnen Schritte
 <details>
-<summary>1. Tranieren des Tensorflow Model</summary>
-</details>
+<summary>Tranieren des Tensorflow Model</summary>
 
-# TensorFlow Model Trainingsdokumentation
+## TensorFlow Model Trainingsdokumentation
 
 Diese Dokumentation beschreibt den Prozess des Trainierens eines TensorFlow-Models, von der Einrichtung der Entwicklungsumgebung über das Sammeln von Bildern bis hin zum Export des Models für die Verwendung in unterschiedlichen Umgebungen.
 
-## 1. Einrichtung der Entwicklungsumgebung
+### 1. Einrichtung der Entwicklungsumgebung
 
 Zu Beginn wird eine virtuelle Umgebung erstellt.
 
@@ -53,7 +52,9 @@ Das komplette Training findet in jupyter Notebook statt. Zum starten folgendes i
 jupyter notebook
 </pre>
 
-## 2. Sammeln und Labeln der Bilder
+### 2. Sammeln und Labeln der Bilder
+
+*Wir befinden uns im Dokument [Image Collection](https://www.hosteurope.de/blog/wie-sie-mit-einer-kreativen-404-fehlerseite-und-lustigen-inhalten-punkten/).*
 
 Hier werden die Labels festgelegt. Es werden Bilder von zwei Handgesten ("Daumen hoch" und "Daumen runter") gesammelt. Die Bilder werden mit der integrierten Webcam des Laptops aufgenommen.
 *number_imgs* gibt an, wie viele Bilder aufgenommen werden sollen.
@@ -63,7 +64,7 @@ labels = ['thumbsup', 'thumbsdown']
 number_imgs = 5
 </pre>
 
-## 3. Ordnerstruktur vorbereiten
+### 3. Ordnerstruktur vorbereiten
 
 Ein spezifischer Ordnerpfad für die gesammelten Bilder wird erstellt. Bei Bedarf werden die entsprechenden Verzeichnisse angelegt.
 
@@ -84,7 +85,7 @@ for label in labels:
 Daraus resultiert diese übersichtliche Struktur:
 ![folder structure](/documentation/pictures/folderstructure.png)
 
-## 4. Bilderfassung
+### 4. Bilderfassung
 
 Die Webcam wird verwendet, um die Bilder für jede Geste aufzunehmen. Dabei wird für jedes Label die angegebene Anzahl an Bilder aufgezeichnet und mittels einer einzigartig generierten UUID als Name abgespeichert.
 
@@ -107,7 +108,7 @@ cap.release()
 cv2.destroyAllWindows()
 </pre>
 
-## 5. Bilder beschriften
+### 5. Bilder beschriften
 
 Das Tool [LabelImg](https://pypi.org/project/labelImg/) wird installiert und verwendet, um die Bilder zu beschriften und die entsprechenden Label-Daten vorzubereiten.
 LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bildern, das die Erstellung von Trainingsdaten für Bilderkennungsmodele erleichtert.
@@ -116,13 +117,15 @@ LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bild
 !pip install --upgrade pyqt5 lxml
 </pre>
 
-## 6. Vorbereitung des Trainings
+### 6. Vorbereitung des Trainings
 
 Vor der Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien **Training** und **Test** eingeteilt.
 \Tensorflow\workspace\images\train
 \Tensorflow\workspace\images\test
 
 Das Model wird auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Models in der Praxis.
+
+*Wir befinden uns im Dokument [Training and Detection](https://www.hosteurope.de/blog/wie-sie-mit-einer-kreativen-404-fehlerseite-und-lustigen-inhalten-punkten/).*
 
 Als nächstes werden notwendigen Pfade und Dateinamen für das Modeltraining werden festgelegt. Dazu gehören Arbeitsverzeichnisse, Skripte, API-Modele, Annotationen und Bilder sowie Pfade für die vorab trainierten Modele.
 
@@ -132,19 +135,67 @@ PRETRAINED_MODEL_NAME = 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8'
 PRETRAINED_MODEL_URL = 'http://download.tensorflow.org/models/object_detection/tf2/20200711/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8.tar.gz'
 </pre>
 
-Bei *PRETRAINED_MODEL_NAME* handelt es sich um ein vortrainiertes und bewährtes TensorFlow Zoo Model. Durch den Einsatz dieses wird der Entwicklungsprozess erheblich beschleunigt. 
+Bei *PRETRAINED_MODEL_NAME* handelt es sich um ein vortrainiertes und bewährtes TensorFlow Zoo Model. Durch den Einsatz dieses wird der Entwicklungsprozess erheblich beschleunigt.
 
-## 7. Modeltraining
 
-Vor Beginn wird [CUDA Deep Neutral Network](https://developer.nvidia.com/cuda-toolkit) installiert. Dies ermöglicht es auf der GPU zu trainieren. Die richtige CUDA Version hängt von der Tensorflow Version ab und kann [hier](https://www.tensorflow.org/install/source_windows) nachgeschaut werden. 
+Anschließend wird Tensorflow Object Detection installiert.
 
-Das Model wird mit den definierten Einstellungen und Parametern trainiert. Ein vorab trainiertes Model aus dem TensorFlow Model Zoo wird beschleunigt, um den Entwicklungsprozess zu verkürzen.
-WEITER
 <pre>
-!python model_main_tf2.py --model_dir=models/my_ssd_mobnet --pipeline_config_path=models/my_ssd_mobnet/pipeline.config
+if os.name=='nt':
+    url="https://github.com/protocolbuffers/protobuf/releases/download/v3.15.6/protoc-3.15.6-win64.zip"
+    wget.download(url)
+    !move protoc-3.15.6-win64.zip {paths['PROTOC_PATH']}
+    !cd {paths['PROTOC_PATH']} && tar -xf protoc-3.15.6-win64.zip
+    os.environ['PATH'] += os.pathsep + os.path.abspath(os.path.join(paths['PROTOC_PATH'], 'bin'))   
+    !cd Tensorflow/models/research && protoc object_detection/protos/*.proto --python_out=. && copy object_detection\\packages\\tf2\\setup.py setup.py && python setup.py build && python setup.py install
+    !cd Tensorflow/models/research/slim && pip install -e .
 </pre>
 
-## 8. Modelauswertung
+Durch das Verfikationskript wird kontrolliert, ob die Installation funktioniert hat.
+
+<pre>
+VERIFICATION_SCRIPT = os.path.join(paths['APIMODEL_PATH'], 'research', 'object_detection', 'builders', 'model_builder_tf2_test.py')
+# Verify Installation
+!python {VERIFICATION_SCRIPT}
+</pre>
+
+### 7. Modeltraining
+
+Vor Beginn kann [CUDA Deep Neutral Network](https://developer.nvidia.com/cuda-toolkit) installiert werden. Dies ermöglicht es auf der GPU zu trainieren und beschleunigt den Prozess. Die richtige CUDA Version hängt von der Tensorflow Version ab und kann [hier](https://www.tensorflow.org/install/source_windows) nachgeschaut werden. 
+
+#### Erstellen der Label Map
+
+Diese dient der klaren Zuordnung zwischen numerischen ID´s und den angelegten Labels. Dies vereinfacht die Interpretation der Ergebnisse.
+
+<pre>
+labels = [{'name':'ThumbsUp', 'id':1}, {'name':'ThumbsDown', 'id':2}]
+
+with open(files['LABELMAP'], 'w') as f:
+    for label in labels:
+        f.write('item { \n')
+        f.write('\tname:\'{}\'\n'.format(label['name']))
+        f.write('\tid:{}\n'.format(label['id']))
+        f.write('}\n')
+</pre>
+
+
+#### Erstellen der TFRecord Dateien
+
+Dieser Prozess ist wichtig für die effiziente Datenspeicherung und -verarbeitung in TensorFlow.
+
+<pre>
+if not os.path.exists(files['TF_RECORD_SCRIPT']):
+    !git clone https://github.com/nicknochnack/GenerateTFRecord {paths['SCRIPTS_PATH']}
+  
+!python {files['TF_RECORD_SCRIPT']} -x {os.path.join(paths['IMAGE_PATH'], 'train')} -l {files['MAP']} -o {os.path.join(paths['ANNOTATION_PATH'], 'train.record')} 
+!python {files['TF_RECORD_SCRIPT']} -x {os.path.join(paths['IMAGE_PATH'], 'test')} -l {files['MAP']} -o {os.path.join(paths['ANNOTATION_PATH'], 'test.record')}
+</pre>
+
+#### Erstellen und anpassen der Model config
+
+
+
+### 8. Modelauswertung
 
 Die Modelleistung wird anhand von Metriken wie Precision, Recall und dem F1-Score bewertet. TensorBoard wird verwendet, um die Trainingsfortschritte und Modelleistungen zu visualisieren.
 
@@ -155,7 +206,7 @@ f1_score = 2 * (precision * recall) / (precision + recall)
 print(f'F1 Score: {f1_score}')
 </pre>
 
-## 9.  Laden und Testbilder auswerten
+### 9.  Laden und Testbilder auswerten
 
 Das trainierte Model wird geladen und mit Testbildern ausgewertet, um die Leistung zu beurteilen.
 
@@ -163,7 +214,7 @@ Das trainierte Model wird geladen und mit Testbildern ausgewertet, um die Leistu
 # Code für das Laden des Models und die Anwendung auf Testbilder
 </pre>
 
-## 10. Live-Erkennung mit der Webcam
+### 10. Live-Erkennung mit der Webcam
 
 Das Model wird in Echtzeit mit einer Webcam getestet, um die Reaktionsgeschwindigkeit und Erkennungsgenauigkeit zu überprüfen.
 
@@ -171,7 +222,7 @@ Das Model wird in Echtzeit mit einer Webcam getestet, um die Reaktionsgeschwindi
 # Code für die Live-Erkennung mit der Webcam
 </pre>
 
-## 11. Model-Export
+### 11. Model-Export
 
 Das Model wird exportiert, um es in anderen Umgebungen nutzen zu können, wie z.B. in einer auf Node.js basierten Webseite. In diesem Fall zu TensorFlow.js.
 
@@ -180,7 +231,7 @@ Das Model wird exportiert, um es in anderen Umgebungen nutzen zu können, wie z.
 # Befehl zum Konvertieren des Models in das TensorFlow.js-Format
 </pre>
 
-## 12. Modelkonvertierung für TFLite
+### 12. Modelkonvertierung für TFLite
 
 Das Model kann im Anschluss noch für mobile Geräte in TensorFlow Lite konvertiert werden, um eine breitere Anwendbarkeit zu ermöglichen.
 
@@ -198,7 +249,7 @@ Die virtuelle Umgebung gibt uns den Vorteil
 Voraussetzung für das Tranieren ist die Installation von 'Tensorflow Object Detection'.
 Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network installiert. Somit wird nicht nur auf der CPU traniert und der Prozess verschnellert sich.
 Der Entwicklungsprozess wurde durch den Einsatz des vortrainierten und bewährter TensorFlow Zoo Model 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8' erheblich beschleunigt.
-Als nächstes wurde die LabelMap angelegt. Diese dient er klaren Zuordnung zwischen numerischen ID´s und den angelegten Labeln. Dies vereinfacht die Interpretation der Ergebnisse.
+Als nächstes wurde die Map angelegt. Diese dient er klaren Zuordnung zwischen numerischen ID´s und den angelegten Labeln. Dies vereinfacht die Interpretation der Ergebnisse.
 Für die Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien Training und Test eingeteilt.
 Das Model wird nun auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Models in der Praxis.
 
@@ -258,10 +309,10 @@ Dies sieht hat folgende Strukur:
 ![model.json und shards](/documentation/pictures/tfjsexport.png)
 Die model.json Datei definiert die Struktur eines TensorFlow.js Models, und die group1-shardXof3.bin Dateien enthalten die aufgeteilten Gewichte des Models für effizientes Laden und Hosting-Kompatibilität.
 
+</details>
 
 <details>
-<summary>2. Webseite schreiben und Model anbinden</summary>
-</details>
+<summary>Webseite schreiben und Model anbinden</summary>
 
 1. Model hosten
    mehrere Möglichkeiten, habe mich zum lokalen hosten entschieden mittels http server (https://www.npmjs.com/package/http-server)
@@ -276,6 +327,7 @@ Beim Laden des Models im Client-Browser wird zuerst die model.json-Datei abgeruf
 
 5. Extra Features: Label werden anhand deren Anzahl geladen und können per Farbe verändert werden 
 
+</details>
 
 <details>
 <summary>3. Projekt in einen Docker Container umsiedeln</summary>
