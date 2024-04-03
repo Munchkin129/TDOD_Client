@@ -21,21 +21,36 @@
 <summary>1. Tranieren des Tensorflow Model</summary>
 </details>
 
-# TensorFlow Modell Trainingsdokumentation
+# TensorFlow Model Trainingsdokumentation
 
-Diese Dokumentation beschreibt den Prozess des Trainierens eines TensorFlow-Modells, von der Einrichtung der Entwicklungsumgebung über das Sammeln von Bildern bis hin zum Export des Modells für die Verwendung in unterschiedlichen Umgebungen.
+Diese Dokumentation beschreibt den Prozess des Trainierens eines TensorFlow-Models, von der Einrichtung der Entwicklungsumgebung über das Sammeln von Bildern bis hin zum Export des Models für die Verwendung in unterschiedlichen Umgebungen.
 
 ## 1. Einrichtung der Entwicklungsumgebung
 
-Zu Beginn wird eine virtuelle Umgebung erstellt, um Paketkonflikte zu vermeiden. Das komplette Training findet in jupyter Notebook statt.
-Eine virtuelle Umgebung wird erstellt, und die notwendigen Abhängigkeiten werden installiert, um eine stabile Entwicklungsumgebung sicherzustellen.
+Zu Beginn wird eine virtuelle Umgebung erstellt.
 
 <pre>
-!pip install opencv-python
-import cv2
-import uuid
-import os
-import time
+python -m venv od
+</pre>
+
+Starten der virtuellen Umgebung.
+
+<pre>
+.\od\Scripts\activate
+</pre>
+
+Installieren der notwendigen Abhängigkeiten.
+
+<pre>
+python -m pip install --upgrade pip
+pip install ipykernel
+python -m ipykernel install --user --name=od
+</pre>
+
+Das komplette Training findet in jupyter Notebook statt. Zum starten folgendes in der virtuellen Umgebung eingeben.
+
+<pre>
+jupyter notebook
 </pre>
 
 ## 2. Sammeln und Labeln der Bilder
@@ -95,7 +110,7 @@ cv2.destroyAllWindows()
 ## 5. Bilder beschriften
 
 Das Tool [LabelImg](https://pypi.org/project/labelImg/) wird installiert und verwendet, um die Bilder zu beschriften und die entsprechenden Label-Daten vorzubereiten.
-LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bildern, das die Erstellung von Trainingsdaten für Bilderkennungsmodelle erleichtert.
+LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bildern, das die Erstellung von Trainingsdaten für Bilderkennungsmodele erleichtert.
 
 <pre>
 !pip install --upgrade pyqt5 lxml
@@ -104,9 +119,12 @@ LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bild
 ## 6. Vorbereitung des Trainings
 
 Vor der Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien **Training** und **Test** eingeteilt.
-Das Modell wird auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Modells in der Praxis.
+\Tensorflow\workspace\images\train
+\Tensorflow\workspace\images\test
 
-Als nächstes werden notwendigen Pfade und Dateinamen für das Modelltraining werden festgelegt. Dazu gehören Arbeitsverzeichnisse, Skripte, API-Modelle, Annotationen und Bilder sowie Pfade für die vorab trainierten Modelle.
+Das Model wird auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Models in der Praxis.
+
+Als nächstes werden notwendigen Pfade und Dateinamen für das Modeltraining werden festgelegt. Dazu gehören Arbeitsverzeichnisse, Skripte, API-Modele, Annotationen und Bilder sowie Pfade für die vorab trainierten Modele.
 
 <pre>
 CUSTOM_MODEL_NAME = 'my_ssd_mobnet' 
@@ -116,19 +134,19 @@ PRETRAINED_MODEL_URL = 'http://download.tensorflow.org/models/object_detection/t
 
 Bei *PRETRAINED_MODEL_NAME* handelt es sich um ein vortrainiertes und bewährtes TensorFlow Zoo Model. Durch den Einsatz dieses wird der Entwicklungsprozess erheblich beschleunigt. 
 
-## 7. Modelltraining
+## 7. Modeltraining
 
 Vor Beginn wird [CUDA Deep Neutral Network](https://developer.nvidia.com/cuda-toolkit) installiert. Dies ermöglicht es auf der GPU zu trainieren. Die richtige CUDA Version hängt von der Tensorflow Version ab und kann [hier](https://www.tensorflow.org/install/source_windows) nachgeschaut werden. 
 
-Das Modell wird mit den definierten Einstellungen und Parametern trainiert. Ein vorab trainiertes Modell aus dem TensorFlow Model Zoo wird beschleunigt, um den Entwicklungsprozess zu verkürzen.
+Das Model wird mit den definierten Einstellungen und Parametern trainiert. Ein vorab trainiertes Model aus dem TensorFlow Model Zoo wird beschleunigt, um den Entwicklungsprozess zu verkürzen.
 WEITER
 <pre>
 !python model_main_tf2.py --model_dir=models/my_ssd_mobnet --pipeline_config_path=models/my_ssd_mobnet/pipeline.config
 </pre>
 
-## 8. Modellauswertung
+## 8. Modelauswertung
 
-Die Modellleistung wird anhand von Metriken wie Precision, Recall und dem F1-Score bewertet. TensorBoard wird verwendet, um die Trainingsfortschritte und Modellleistungen zu visualisieren.
+Die Modelleistung wird anhand von Metriken wie Precision, Recall und dem F1-Score bewertet. TensorBoard wird verwendet, um die Trainingsfortschritte und Modelleistungen zu visualisieren.
 
 <pre>
 precision = 0.7859           
@@ -137,37 +155,37 @@ f1_score = 2 * (precision * recall) / (precision + recall)
 print(f'F1 Score: {f1_score}')
 </pre>
 
-## 9. Modell laden und Testbilder auswerten
+## 9.  Laden und Testbilder auswerten
 
-Das trainierte Modell wird geladen und mit Testbildern ausgewertet, um die Leistung zu beurteilen.
+Das trainierte Model wird geladen und mit Testbildern ausgewertet, um die Leistung zu beurteilen.
 
 <pre>
-# Code für das Laden des Modells und die Anwendung auf Testbilder
+# Code für das Laden des Models und die Anwendung auf Testbilder
 </pre>
 
 ## 10. Live-Erkennung mit der Webcam
 
-Das Modell wird in Echtzeit mit einer Webcam getestet, um die Reaktionsgeschwindigkeit und Erkennungsgenauigkeit zu überprüfen.
+Das Model wird in Echtzeit mit einer Webcam getestet, um die Reaktionsgeschwindigkeit und Erkennungsgenauigkeit zu überprüfen.
 
 <pre>
 # Code für die Live-Erkennung mit der Webcam
 </pre>
 
-## 11. Modell-Export
+## 11. Model-Export
 
-Das Modell wird exportiert, um es in anderen Umgebungen nutzen zu können, wie z.B. in einer auf Node.js basierten Webseite. In diesem Fall zu TensorFlow.js.
+Das Model wird exportiert, um es in anderen Umgebungen nutzen zu können, wie z.B. in einer auf Node.js basierten Webseite. In diesem Fall zu TensorFlow.js.
 
 <pre>
 !pip install tensorflowjs
-# Befehl zum Konvertieren des Modells in das TensorFlow.js-Format
+# Befehl zum Konvertieren des Models in das TensorFlow.js-Format
 </pre>
 
-## 12. Modellkonvertierung für TFLite
+## 12. Modelkonvertierung für TFLite
 
-Das Modell kann im Anschluss noch für mobile Geräte in TensorFlow Lite konvertiert werden, um eine breitere Anwendbarkeit zu ermöglichen.
+Das Model kann im Anschluss noch für mobile Geräte in TensorFlow Lite konvertiert werden, um eine breitere Anwendbarkeit zu ermöglichen.
 
 <pre>
-# Befehle für die Konvertierung des Modells in das TFLite-Format
+# Befehle für die Konvertierung des Models in das TFLite-Format
 </pre>
 
 
@@ -179,10 +197,10 @@ Die virtuelle Umgebung gibt uns den Vorteil
 3. Trainieren des Models mittels Tensorflow
 Voraussetzung für das Tranieren ist die Installation von 'Tensorflow Object Detection'.
 Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network installiert. Somit wird nicht nur auf der CPU traniert und der Prozess verschnellert sich.
-Der Entwicklungsprozess wurde durch den Einsatz des vortrainierten und bewährter TensorFlow Zoo Modell 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8' erheblich beschleunigt.
+Der Entwicklungsprozess wurde durch den Einsatz des vortrainierten und bewährter TensorFlow Zoo Model 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8' erheblich beschleunigt.
 Als nächstes wurde die LabelMap angelegt. Diese dient er klaren Zuordnung zwischen numerischen ID´s und den angelegten Labeln. Dies vereinfacht die Interpretation der Ergebnisse.
 Für die Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien Training und Test eingeteilt.
-Das Modell wird nun auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Modells in der Praxis.
+Das Model wird nun auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Models in der Praxis.
 
 4. Auswertung des Models
 Die Auswertung des Models erfolgt mittels Tensorboard. Dies ermöglicht eine Visualisierung verschiedener Kategorien und ein schnelleres Verständnis anhand Skalenwerten.
@@ -191,8 +209,8 @@ Tensorboard kann mit folgedem Befehl innerhalb des /eval Ordners geöffnet werde
 Alternativ kann auch ein Command zur Bewertung genutzt werden.
 Hervorzuheben sind Precision, Recall und der F1-Score.
 Precision gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
-Recall misst, welcher Anteil der tatsächlichen positiven Fälle vom Modell korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
-Der F1-Score ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Modells, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
+Recall misst, welcher Anteil der tatsächlichen positiven Fälle vom Model korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
+Der F1-Score ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Models, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
 
 Auf welche Metriken haben wir Einfluss:
 
@@ -210,7 +228,7 @@ Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung änd
 | Model_v4      | 0.7859          | 0.8082        | 0.7969         |
 
 
-Anhand der Auswertung der Modelle konnte ich so Einfluss auf Precision und Recall nehmen.
+Anhand der Auswertung der Modele konnte ich so Einfluss auf Precision und Recall nehmen.
 
 |               | Anzahl Bilder   | Aufteilung Training/Test | Trainingssteps      | 
 |:------------: |:---------------:| :-----------------------:| :------------------:|
@@ -238,7 +256,7 @@ Um das Model nun in anderen Umgebungen nutzen möchte muss dieses zunächst eing
 Da die Webseite auf Node.js basiert, wird das Model nach Tensorflow.js(tfjs) exportiert.
 Dies sieht hat folgende Strukur: 
 ![model.json und shards](/documentation/pictures/tfjsexport.png)
-Die model.json Datei definiert die Struktur eines TensorFlow.js Modells, und die group1-shardXof3.bin Dateien enthalten die aufgeteilten Gewichte des Modells für effizientes Laden und Hosting-Kompatibilität.
+Die model.json Datei definiert die Struktur eines TensorFlow.js Models, und die group1-shardXof3.bin Dateien enthalten die aufgeteilten Gewichte des Models für effizientes Laden und Hosting-Kompatibilität.
 
 
 <details>
@@ -250,7 +268,7 @@ Die model.json Datei definiert die Struktur eines TensorFlow.js Modells, und die
    individuelle Challenge: jedes geladene Model sendet 8 Arrays in verschiedener Reihenfolge
    Wir brauchen Boxes, Classes und Scores und müssen diese richtig zuordnen. Dafür habe ich einen Algorithmus geschrieben
    
-Beim Laden des Modells im Client-Browser wird zuerst die model.json-Datei abgerufen, um die Modellstruktur zu konstruieren. Anschließend werden die zugehörigen Gewichte aus den .bin-Dateien geladen, um das Modell zu vervollständigen und inferenzbereit zu machen.
+Beim Laden des Models im Client-Browser wird zuerst die model.json-Datei abgerufen, um die Modelstruktur zu konstruieren. Anschließend werden die zugehörigen Gewichte aus den .bin-Dateien geladen, um das Model zu vervollständigen und inferenzbereit zu machen.
 
 3. Webcam für live Feed
 
