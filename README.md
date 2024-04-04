@@ -2,7 +2,7 @@
 
 ## Starten der Webseite und des Models
 <details open>
-<summary> </summary>
+<summary>Schritte zum Starten des Projekts</summary>
 <ol>
 <li><strong>Dependencies installieren</strong></li>
   <p>In der Konsole: <br>
@@ -108,7 +108,7 @@ cap.release()
 cv2.destroyAllWindows()
 </pre>
 
-### 5. Bilder beschriften
+### 5. Bilder annotieren
 
 Das Tool [LabelImg](https://pypi.org/project/labelImg/) wird installiert und verwendet, um die Bilder zu beschriften und die entsprechenden Label-Daten vorzubereiten.
 LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bildern, das die Erstellung von Trainingsdaten für Bilderkennungsmodele erleichtert.
@@ -119,11 +119,15 @@ LabelImg ist ein grafisches Tool zur manuellen Beschriftung von Objekten in Bild
 
 ### 6. Vorbereitung des Trainings
 
+#### Aufteilung der Bilder
+
 Vor der Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien **Training** und **Test** eingeteilt.
 \Tensorflow\workspace\images\train
 \Tensorflow\workspace\images\test
 
 Das Model wird auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Models in der Praxis.
+
+#### Pfade generieren
 
 *Wir befinden uns im Dokument [Training and Detection](https://www.hosteurope.de/blog/wie-sie-mit-einer-kreativen-404-fehlerseite-und-lustigen-inhalten-punkten/).*
 
@@ -137,8 +141,7 @@ PRETRAINED_MODEL_URL = 'http://download.tensorflow.org/models/object_detection/t
 
 Bei *PRETRAINED_MODEL_NAME* handelt es sich um ein vortrainiertes und bewährtes TensorFlow Zoo Model. Durch den Einsatz dieses wird der Entwicklungsprozess erheblich beschleunigt.
 
-
-Anschließend wird Tensorflow Object Detection installiert.
+#### Installieren von Tensorflow Object Detection 
 
 <pre>
 if os.name=='nt':
@@ -158,10 +161,6 @@ VERIFICATION_SCRIPT = os.path.join(paths['APIMODEL_PATH'], 'research', 'object_d
 # Verify Installation
 !python {VERIFICATION_SCRIPT}
 </pre>
-
-### 7. Modeltraining
-
-Vor Beginn kann [CUDA Deep Neutral Network](https://developer.nvidia.com/cuda-toolkit) installiert werden. Dies ermöglicht es auf der GPU zu trainieren und beschleunigt den Prozess. Die richtige CUDA Version hängt von der Tensorflow Version ab und kann [hier](https://www.tensorflow.org/install/source_windows) nachgeschaut werden. 
 
 #### Erstellen der Label Map
 
@@ -193,82 +192,191 @@ if not os.path.exists(files['TF_RECORD_SCRIPT']):
 
 #### Erstellen und anpassen der Model config
 
+Hierzu wird die config des vortranierten Models kopiert und die fehlenden Pfade ergänzt.
 
+<pre>
+if os.name == 'nt':
+    !copy {os.path.join(paths['PRETRAINED_MODEL_PATH'], PRETRAINED_MODEL_NAME, 'pipeline.config')} {os.path.join(paths['CHECKPOINT_PATH'])}
+</pre>
+
+#### Installieren von CUDA Toolkit
+
+[CUDA](https://developer.nvidia.com/cuda-toolkit) kann installiert werden um trainieren auf der GPU zu ermöglichen. Dies beschleunigt den Prozess sehr. Die richtige CUDA Version hängt von der Tensorflow Version ab und kann [hier](https://www.tensorflow.org/install/source_windows) nachgeschaut werden. 
+
+### 7. Modeltraining
+
+Folgender Abschnitt generiert den Code, welcher das tranieren auslöst.
+*num_train_steps* kann angepasst werden um die Anzahl der Traningssteps zu variieren.
+
+<pre>
+TRAINING_SCRIPT = os.path.join(paths['APIMODEL_PATH'], 'research', 'object_detection', 'model_main_tf2.py')
+  
+command = "python {} --model_dir={} --pipeline_config_path={} --num_train_steps=2000".format(TRAINING_SCRIPT, paths['CHECKPOINT_PATH'],files['PIPELINE_CONFIG'])
+  
+print(command)
+</pre>
+
+Der Command kann innerhalb von juypter oder in einer Konsole mit aktiviter Virtueller Umgebung ausgeführt werden.
 
 ### 8. Modelauswertung
 
-Die Modelleistung wird anhand von Metriken wie Precision, Recall und dem F1-Score bewertet. TensorBoard wird verwendet, um die Trainingsfortschritte und Modelleistungen zu visualisieren.
+TensorBoard wird verwendet, um die Trainingsfortschritte und Modelleistungen zu visualisieren.
+Es wird mit Befehl innerhalb des /eval Ordners geöffnet werden
 
 <pre>
-precision = 0.7859           
-recall = 0.8082
-f1_score = 2 * (precision * recall) / (precision + recall)
-print(f'F1 Score: {f1_score}')
+tensorboard --logdir=.
 </pre>
+
+Die Modelleistung wird anhand von Metriken wie Precision, Recall und dem F1-Score bewertet.
+Der F1-Score kann errechet werden.
+
+<pre>
+f1_score = 2 * (precision * recall) / (precision + recall)
+</pre>
+
+[Hier](MISSING) eine ausführlichere Auswertung zwischen den Modelen.
 
 ### 9.  Laden und Testbilder auswerten
 
-Das trainierte Model wird geladen und mit Testbildern ausgewertet, um die Leistung zu beurteilen.
+Das trainierte Model wird geladen und mit Testbildern ausgewertet, um zu visualisieren was auf einzellnen Bildern erkannt wurde.
 
 <pre>
-# Code für das Laden des Models und die Anwendung auf Testbilder
+img = cv2.imread(IMAGE_PATH)
+image_np = np.array(img)
+
+input_tensor = tf.convert_to_tensor(np.expand_dims(image_np, 0), dtype=tf.float32)
+detections = detect_fn(input_tensor)
+
+num_detections = int(detections.pop('num_detections'))
+detections = {key: value[0, :num_detections].numpy()
+              for key, value in detections.items()}
+detections['num_detections'] = num_detections
+
+# detection_classes should be ints.
+detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
+
+label_id_offset = 1
+image_np_with_detections = image_np.copy()
+
+viz_utils.visualize_boxes_and_labels_on_image_array(
+            image_np_with_detections,
+            detections['detection_boxes'],
+            detections['detection_classes']+label_id_offset,
+            detections['detection_scores'],
+            category_index,
+            use_normalized_coordinates=True,
+            max_boxes_to_draw=5,
+            min_score_thresh=.8,
+            agnostic_mode=False)
+
+plt.imshow(cv2.cvtColor(image_np_with_detections, cv2.COLOR_BGR2RGB))
+plt.show()
 </pre>
+
+Folgende zwei Bilder kamen in der Model_v4 Iteration dazu. Bei einem wird der Daumen nach unten erkannt, bei dem anderen nicht. Daraus können Rückschlüsse gezogen werden.
+
+![Erkannt](/documentation/pictures/testModelv4ThmubsDownMatch.png)
+
+![Nicht erkannt](/documentation/pictures/testModelv4ThmubsDownNoMatch.png)
 
 ### 10. Live-Erkennung mit der Webcam
 
 Das Model wird in Echtzeit mit einer Webcam getestet, um die Reaktionsgeschwindigkeit und Erkennungsgenauigkeit zu überprüfen.
 
 <pre>
-# Code für die Live-Erkennung mit der Webcam
+cap = cv2.VideoCapture(0)
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+while cap.isOpened(): 
+    ret, frame = cap.read()
+    image_np = np.array(frame)
+    
+    input_tensor = tf.convert_to_tensor(np.expand_dims(image_np, 0), dtype=tf.float32)
+    detections = detect_fn(input_tensor)
+    
+    num_detections = int(detections.pop('num_detections'))
+    detections = {key: value[0, :num_detections].numpy()
+                  for key, value in detections.items()}
+    detections['num_detections'] = num_detections
+
+    # detection_classes should be ints.
+    detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
+
+    label_id_offset = 1
+    image_np_with_detections = image_np.copy()
+
+    viz_utils.visualize_boxes_and_labels_on_image_array(
+                image_np_with_detections,
+                detections['detection_boxes'],
+                detections['detection_classes']+label_id_offset,
+                detections['detection_scores'],
+                category_index,
+                use_normalized_coordinates=True,
+                max_boxes_to_draw=5,
+                min_score_thresh=.8,
+                agnostic_mode=False)
+
+    cv2.imshow('object detection',  cv2.resize(image_np_with_detections, (800, 600)))
+    
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+        cap.release()
+        cv2.destroyAllWindows()
+        break
 </pre>
 
 ### 11. Model-Export
+
+#### Einfrieren des Models
+
+Das Model wird eingefroren um es exportieren zu können. Es wird vereinfacht und portabel gemacht. 
+
+<pre>
+FREEZE_SCRIPT = os.path.join(paths['APIMODEL_PATH'], 'research', 'object_detection', 'exporter_main_v2.py ')
+command = "python {} --input_type=image_tensor --pipeline_config_path={} --trained_checkpoint_dir={} --output_directory={}".format(FREEZE_SCRIPT ,files['PIPELINE_CONFIG'], paths['CHECKPOINT_PATH'], paths['OUTPUT_PATH'])
+</pre>
+  
+#### Exportieren des Models
 
 Das Model wird exportiert, um es in anderen Umgebungen nutzen zu können, wie z.B. in einer auf Node.js basierten Webseite. In diesem Fall zu TensorFlow.js.
 
 <pre>
 !pip install tensorflowjs
-# Befehl zum Konvertieren des Models in das TensorFlow.js-Format
+command = "tensorflowjs_converter --input_format=tf_saved_model --output_node_names='detection_boxes,detection_classes,detection_features,detection_multiclass_scores,detection_scores,num_detections,raw_detection_boxes,raw_detection_scores' --output_format=tfjs_graph_model --signature_name=serving_default {} {}".format(os.path.join(paths['OUTPUT_PATH'], 'saved_model'), paths['TFJS_PATH'])
 </pre>
-
-### 12. Modelkonvertierung für TFLite
 
 Das Model kann im Anschluss noch für mobile Geräte in TensorFlow Lite konvertiert werden, um eine breitere Anwendbarkeit zu ermöglichen.
 
-<pre>
-# Befehle für die Konvertierung des Models in das TFLite-Format
-</pre>
+## Wiederholung des Vorgangs
 
+Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. 
+Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat.
+Mehr Bilder oder mehr Trainingssteps bedeuten nicht automatisch eine Verbesserung.
 
-1. Installation und Setup
-Für das Trainieren eines eigenen Tensorflow Models muss zuerst eine Basis geschaffen werden.
-In dieserm Projekt verwende ich eine virtuelle Umgebung und jupyter Notebooks mit Python als diese.
-Die virtuelle Umgebung gibt uns den Vorteil
+In diesem Projekt habe ich mein Model in fünf Zyklen erstellt.
 
-3. Trainieren des Models mittels Tensorflow
-Voraussetzung für das Tranieren ist die Installation von 'Tensorflow Object Detection'.
-Um zusätzlich auf der GPU tranieren zu können wurde CUDA Deep Neutral Network installiert. Somit wird nicht nur auf der CPU traniert und der Prozess verschnellert sich.
-Der Entwicklungsprozess wurde durch den Einsatz des vortrainierten und bewährter TensorFlow Zoo Model 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8' erheblich beschleunigt.
-Als nächstes wurde die Map angelegt. Diese dient er klaren Zuordnung zwischen numerischen ID´s und den angelegten Labeln. Dies vereinfacht die Interpretation der Ergebnisse.
-Für die Durchführung des Tranings werden die gelabelten Bilder in die zwei Kategorien Training und Test eingeteilt.
-Das Model wird nun auf den Trainingsdateien generiert und anhand der Testbilder evaluiert. Dies greift eine Überanpassung vorweg und gibt Aufschluss auf eine tatsächliche Effektivität des Models in der Praxis.
+### Bewertung der einzellnen Modele
 
-4. Auswertung des Models
-Die Auswertung des Models erfolgt mittels Tensorboard. Dies ermöglicht eine Visualisierung verschiedener Kategorien und ein schnelleres Verständnis anhand Skalenwerten.
-Tensorboard kann mit folgedem Befehl innerhalb des /eval Ordners geöffnet werden
-<pre>tensorboard --logdir=.</pre>
-Alternativ kann auch ein Command zur Bewertung genutzt werden.
-Hervorzuheben sind Precision, Recall und der F1-Score.
-Precision gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
-Recall misst, welcher Anteil der tatsächlichen positiven Fälle vom Model korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
-Der F1-Score ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Models, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
+Für dieses Projekt innteressieren uns Precision, Recall und der F1-Score.
+
+**Precision** gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
+
+**Recall** misst, welcher Anteil der tatsächlichen positiven Fälle vom Model korrekt als positiv erkannt wurde. Dies ist wichtig um zu gewährleisten, dass möglichst alle relevanten Gesten vom System erkannt werden.
+
+Der **F1-Score** ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Models, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
+
 
 Auf welche Metriken haben wir Einfluss:
 
 
-Anzahl und Art der Bilder: Ändern der Position der Hände, Neigen der Hände, verschiedene Lichteinstellungen, Distanz zur Kamera ändern.
-Trainingsteps: Änderung der Anzahl, bei mehr Steps dauert das Training länger
-Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung ändern
+**Anzahl und Art der Bilder**: Ändern der Position der Hände, Neigen der Hände, verschiedene Lichteinstellungen, Distanz zur Kamera ändern.
+
+**Trainingsteps**: Änderung der Anzahl um Lerneffekt zu erlauben.
+![Trainings]()
+
+**Aufteilung der Trainings und Test Kategorie**: Bilder tauschen und Gewichtung ändern.
+
+
 
 |               | Precision       | Recall        | F1-Score       | 
 |:-------------:|:---------------:|:-------------:|:--------------:|
@@ -279,8 +387,6 @@ Aufteilung der Trainings und Test Kategorie: Bilder tauschen und Gewichtung änd
 | Model_v4      | 0.7859          | 0.8082        | 0.7969         |
 
 
-Anhand der Auswertung der Modele konnte ich so Einfluss auf Precision und Recall nehmen.
-
 |               | Anzahl Bilder   | Aufteilung Training/Test | Trainingssteps      | 
 |:------------: |:---------------:| :-----------------------:| :------------------:|
 | Model_v0      | 9               | 6/3        ~67/33%       | 2000                |
@@ -289,25 +395,33 @@ Anhand der Auswertung der Modele konnte ich so Einfluss auf Precision und Recall
 | Model_v3      | 84              | 59/25      ~70/30%       | 10000               |
 | Model_v4      | 114             | 79/35      ~70/30%       | 10000               |
 
-5. Testen des Models anhand Bildern und Livevideo
-Um nun praktisch zu sehen wie sich das tranierte Model verhält, können entweder einzellne Bilder geladen und auf diese wird dann das erkannte mit Gewichtung gezeichnet.
-So können Rückschlüsse auf das Model genommen werden. Folgende zwei Bilder kamen in der Model_v4 Iteration dazu. Bei einem wird der Daumen nach unten erkannt, bei dem anderen nicht.
-![Erkannt](/documentation/pictures/testModelv4ThmubsDownMatch.png)
-![Nicht erkannt](/documentation/pictures/testModelv4ThmubsDownNoMatch.png)
+### Auswertung
 
-Alternativ kann auch ein Livevideo über die Webcam gestartet werden um Live Auswertungen zu bekommen.
-Hier kann getestet werden, wie schnell das System die Handgesten erkennt.
+#### Theoretisch
+
+Es ist eine klare Verbesserung der Modellleistung von Model_v0 bis Model_v4 erkennbar.
+
+Die Zunahme der Bildanzahl hat einen positiven Einfluss auf die Modelleistung.
+Hierbei wurde darauf geachtet, Bilder mit variablen Merkmalen zu nutzen wie Handpositionen, Entfernung, Belichtung
+
+Die Aufteilung der von 70/30 hat sich als bewährt herausgestellt.
+
+Die Erhöhung der Trainingssteps hat sich als guter Faktor zu Verbesserung des Gesamtmodels herausgestellt. Dies wird beim Unterschied zwischen v2 und v3 deutlich.
+Hier die Lernrate der Modele:
+![learningrate](MSIISNG)
+
+#### Praktisch
+
+Nicht nur theoretisch sonder auch praktisch ist eine Verbesserung zwischen den Modelen bei der Live Kontrolle spürbar.
+
+Durch die Zunahme von Bildern in verschiedenen Handpositionen, Entfernungen und Belichtungen ist das Model besser geworden, diese korrekt zu erkennen.
 
 
-7. Wiederholung der vorherigen Schritte und Anpassungen vornhemen.
-Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat. Mehr Bilder oder mehr Trainingssteps bedeuten nicht automatisch eine Verbesserung.
+Model_v0
+![examplev0](MSIISNG)
 
-8. Exportieren des Models
-Um das Model nun in anderen Umgebungen nutzen möchte muss dieses zunächst eingefroren und dann exportiert werden.
-Da die Webseite auf Node.js basiert, wird das Model nach Tensorflow.js(tfjs) exportiert.
-Dies sieht hat folgende Strukur: 
-![model.json und shards](/documentation/pictures/tfjsexport.png)
-Die model.json Datei definiert die Struktur eines TensorFlow.js Models, und die group1-shardXof3.bin Dateien enthalten die aufgeteilten Gewichte des Models für effizientes Laden und Hosting-Kompatibilität.
+Model_v4
+![examplev4](MSIISNG)
 
 </details>
 
