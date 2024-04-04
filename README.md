@@ -365,7 +365,7 @@ Für dieses Projekt interessieren uns Precision, Recall und der F1-Score.
 Der **F1-Score** ist das Mittel aus Precision und Recall und gibt ein ausgewogenes Maß für die Leistung eines Models, indem es beide Metriken berücksichtigt. Er ist besonders nützlich für die Bewertung der Gesamtleistung des Models.
 
 
-Auf welche Metriken haben wir Einfluss:
+### Auf welche Metriken haben wir Einfluss:
 
 
 **Anzahl und Art der Bilder**: Ändern der Position der Hände, Neigen der Hände, verschiedene Lichteinstellungen, Distanz zur Kamera ändern.
@@ -374,7 +374,9 @@ Auf welche Metriken haben wir Einfluss:
 
 **Aufteilung der Trainings und Test Kategorie**: Bilder tauschen und Gewichtung ändern.
 
+### Auswertung
 
+Folgend sind Diagramme mit für uns interessante Werte.
 
 |               | Precision       | Recall        | F1-Score       | 
 |:-------------:|:---------------:|:-------------:|:--------------:|
@@ -392,8 +394,6 @@ Auf welche Metriken haben wir Einfluss:
 | Model_v2      | 73              | 53/20      ~73/27%       | 2000                |
 | Model_v3      | 84              | 59/25      ~70/30%       | 10000               |
 | Model_v4      | 114             | 79/35      ~70/30%       | 10000               |
-
-### Auswertung
 
 #### Theoretisch
 
