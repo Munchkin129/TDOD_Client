@@ -82,9 +82,6 @@ for label in labels:
         !mkdir {path}
 </pre>
 
-Daraus resultiert diese übersichtliche Struktur:
-![folder structure](/documentation/pictures/folderstructure.png)
-
 ### 4. Bilderfassung
 
 Die Webcam wird verwendet, um die Bilder für jede Geste aufzunehmen. Dabei wird für jedes Label die angegebene Anzahl an Bilder aufgezeichnet und mittels einer einzigartig generierten UUID als Name abgespeichert.
