@@ -233,7 +233,7 @@ Der F1-Score kann errechet werden.
 f1_score = 2 * (precision * recall) / (precision + recall)
 </pre>
 
-[Hier](MISSING) eine ausführlichere Auswertung zwischen den Modelen.
+[Hier](/README.md#auswertung) eine ausführlichere Auswertung zwischen den Modelen.
 
 ### 9.  Laden und Testbilder auswerten
 
