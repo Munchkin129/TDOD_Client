@@ -137,6 +137,7 @@ PRETRAINED_MODEL_URL = 'http://download.tensorflow.org/models/object_detection/t
 </pre>
 
 Bei *PRETRAINED_MODEL_NAME* handelt es sich um ein vortrainiertes und bewährtes TensorFlow Zoo Model. Durch den Einsatz dieses wird der Entwicklungsprozess erheblich beschleunigt.
+Ich habe mich für *SSD MobileNet v2 320x320* entschieden, weil es schnell trainiert. [Hier](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md) andere Möglichkeiten.
 
 #### Installieren von Tensorflow Object Detection 
 
