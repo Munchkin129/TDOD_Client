@@ -351,13 +351,12 @@ Das Model kann im Anschluss noch für mobile Geräte in TensorFlow Lite konverti
 
 Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. 
 Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat.
-Mehr Bilder oder mehr Trainingssteps bedeuten nicht automatisch eine Verbesserung.
 
 In diesem Projekt habe ich mein Model in fünf Zyklen erstellt.
 
 ### Bewertung der einzellnen Modele
 
-Für dieses Projekt innteressieren uns Precision, Recall und der F1-Score.
+Für dieses Projekt interessieren uns Precision, Recall und der F1-Score.
 
 **Precision** gibt an, welcher Anteil der als positiv klassifizierten Fälle tatsächlich positiv ist. Dies ist wichtig um sicherzustellen, dass die erkannten Gesten tatsächlich korrekt sind
 
@@ -372,7 +371,6 @@ Auf welche Metriken haben wir Einfluss:
 **Anzahl und Art der Bilder**: Ändern der Position der Hände, Neigen der Hände, verschiedene Lichteinstellungen, Distanz zur Kamera ändern.
 
 **Trainingsteps**: Änderung der Anzahl um Lerneffekt zu erlauben.
-![Trainings]()
 
 **Aufteilung der Trainings und Test Kategorie**: Bilder tauschen und Gewichtung ändern.
 
@@ -401,12 +399,12 @@ Auf welche Metriken haben wir Einfluss:
 
 Es ist eine klare Verbesserung der Modellleistung von Model_v0 bis Model_v4 erkennbar.
 
-Die Zunahme der Bildanzahl hat einen positiven Einfluss auf die Modelleistung.
-Hierbei wurde darauf geachtet, Bilder mit variablen Merkmalen zu nutzen wie Handpositionen, Entfernung, Belichtung
+Die **Zunahme der Bildanzahl** hat einen **positiven Einfluss** auf die Modelleistung.
+Hierbei wurde darauf geachtet, Bilder mit variablen Merkmalen zu nutzen wie Handpositionen, Entfernung und Belichtung.
 
-Die Aufteilung der von 70/30 hat sich als bewährt herausgestellt.
+Die **Aufteilung** der von **70/30** hat sich als bewährt herausgestellt.
 
-Die Erhöhung der Trainingssteps hat sich als guter Faktor zu Verbesserung des Gesamtmodels herausgestellt. Dies wird beim Unterschied zwischen v2 und v3 deutlich.
+Die **Erhöhung der Trainingssteps** hat sich als guter Faktor zu **Verbesserung des Gesamtmodels** herausgestellt. Dies wird beim Unterschied zwischen v2 und v3 deutlich.
 Hier die Lernrate der Modele:
 ![learningrate](MSIISNG)
 
