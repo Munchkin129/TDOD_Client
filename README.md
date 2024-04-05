@@ -219,7 +219,7 @@ Der Command kann innerhalb von juypter oder in einer Konsole mit aktiviter Virtu
 
 ### 8. Modelauswertung
 
-TensorBoard wird verwendet, um die Trainingsfortschritte und Modelleistungen zu visualisieren.
+[TensorBoard](https://www.tensorflow.org/tensorboard) wird verwendet, um die Trainingsfortschritte und Modelleistungen zu visualisieren.
 Es wird mit Befehl innerhalb des /eval Ordners geöffnet werden
 
 <pre>
@@ -235,7 +235,7 @@ f1_score = 2 * (precision * recall) / (precision + recall)
 
 [Hier](/README.md#auswertung) eine ausführlichere Auswertung zwischen den Modelen.
 
-### 9.  Laden und Testbilder auswerten
+### 9.  Erkennung anhand von Bildern
 
 Das trainierte Model wird geladen und mit Testbildern ausgewertet, um zu visualisieren was auf einzellnen Bildern erkannt wurde.
 
@@ -272,9 +272,13 @@ plt.imshow(cv2.cvtColor(image_np_with_detections, cv2.COLOR_BGR2RGB))
 plt.show()
 </pre>
 
-Folgende zwei Bilder kamen in der Model_v4 Iteration dazu. Bei einem wird der Daumen nach unten erkannt, bei dem anderen nicht. Daraus können Rückschlüsse gezogen werden.
+Folgende zwei Bilder kamen in der Model_v4 Iteration als Testbilder dazu. 
+
+Hier funktioniert die Erkennung richtig.
 
 ![Erkannt](/documentation/pictures/testModelv4ThmubsDownMatch.png)
+
+Hier wird nichts erkannt. Dies könnte an der Schärfe des Bildes, den Lichtverhältnissen oder am trainierten Model liegen.
 
 ![Nicht erkannt](/documentation/pictures/testModelv4ThmubsDownNoMatch.png)
 
@@ -324,6 +328,10 @@ while cap.isOpened():
         break
 </pre>
 
+Hier eine Erkennung mit dem **Model_v2**. Wie man sieht werden die Gesten nicht immer korrekt erkannt. Dies liegt an der Drehung der Hand, der Entfernung zur Kamera und eben auch am Model selbst. Es gibt auch falsche Erkennungen.
+
+![examplev2gif](/documentation/pictures/evalModelv2Live.gif)
+
 ### 11. Model-Export
 
 #### Einfrieren des Models
@@ -351,7 +359,7 @@ Das Model kann im Anschluss noch für mobile Geräte in TensorFlow Lite konverti
 Um das Model zu verfeiern kann der Prozess von neuem Durchlaufen werden um eine Verbesserung vorzunehmen. 
 Hierzu muss man individuell schauen, ob die Veränderungen die gewünschte Verbesserung erzielt hat.
 
-In diesem Projekt habe ich mein Model in fünf Zyklen erstellt.
+In diesem Projekt habe ich mein Model in **fünf Zyklen** erstellt.
 
 ### Bewertung der einzellnen Modele
 
@@ -414,11 +422,13 @@ Nicht nur theoretisch sonder auch praktisch ist eine Verbesserung zwischen den M
 Durch die Zunahme von Bildern in verschiedenen Handpositionen, Entfernungen und Belichtungen ist das Model besser geworden, diese korrekt zu erkennen.
 
 
-Model_v0
-![examplev0](MSIISNG)
+**Model_v0** Hier wird die Geste nicht erkannt.
 
-Model_v4
-![examplev4](MSIISNG)
+![examplev0](/documentation/pictures/testModelv0ThmubsUpNoMatch.png)
+
+**Model_v4** Hier wird die Geste erkannt.
+
+![examplev4](/documentation/pictures/testModelv4ThmubsDownMatch.png)
 
 </details>
 
@@ -427,7 +437,9 @@ Model_v4
 
 1. Model hosten
    mehrere Möglichkeiten, habe mich zum lokalen hosten entschieden mittels http server (https://www.npmjs.com/package/http-server)
+
    individuelle Challenge: jedes geladene Model sendet 8 Arrays in verschiedener Reihenfolge
+
    Wir brauchen Boxes, Classes und Scores und müssen diese richtig zuordnen. Dafür habe ich einen Algorithmus geschrieben
    
 Beim Laden des Models im Client-Browser wird zuerst die model.json-Datei abgerufen, um die Modelstruktur zu konstruieren. Anschließend werden die zugehörigen Gewichte aus den .bin-Dateien geladen, um das Model zu vervollständigen und inferenzbereit zu machen.
