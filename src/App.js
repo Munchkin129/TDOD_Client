@@ -212,6 +212,7 @@ function App() {
     <LabelContext.Provider value={{ labels }}>
     <div className="App">
       <div className="Header">
+      <h1>Object Detection</h1>
       </div>
       <div className="LiveFeed">
         <Webcam
@@ -232,6 +233,7 @@ function App() {
         <LabelList changeColor={changeColor}/>
       </div>
       <div className="Footer">
+      <p>© 2024 Dirk Hofmann. <a href="https://git.ai.fh-erfurt.de/ma4163sp1/ba_project/ss23/ba_project_ss23_hofmann" target="_blank" rel="noopener noreferrer" className="FooterLink">GitLab.</a></p>
       </div>
     </div>
     </LabelContext.Provider>

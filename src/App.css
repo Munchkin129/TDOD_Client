@@ -11,10 +11,19 @@
   text-align: center;
   justify-content: center;
   background-color: #282c34;
+  font-family: 'Open Sans', sans-serif;
   height: 100vh;
 }
 
-.Header { grid-area: Header; }
+.Header { 
+  grid-area: Header; 
+  width: 100%;
+  padding: 20px 0;
+  background-color: #282c34;
+  color: #005a9c;
+  text-align: center;
+  font-size: 24px;
+}
 
 .LiveFeed {
   grid-area: LiveFeed; 
@@ -44,14 +53,39 @@
   grid-area: StatusIndicator; 
   display: flex;
   flex-direction: column;
+  justify-content: center; 
   z-index: 10;
+  font-size: 25px;
 }
 
 .LabelList { 
   grid-area: LabelList;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  font-size: 25px;
 }
 
-.Footer { grid-area: Footer; }
+.Footer { 
+  grid-area: Footer;
+  width: 100%;
+  padding: 10px 0;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+
+.FooterLink{
+  color: #007bff;
+  text-decoration: none;
+}
+
+.FooterLink:hover {
+  text-decoration: underline;
+}
 
 .LabelButton {
   padding: 10px 20px;
