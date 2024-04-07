@@ -452,6 +452,8 @@ Beim Laden des Models im Client-Browser wird zuerst die model.json-Datei abgeruf
 
 </details>
 
+## Tutroial eigenes Model anbinden
+
 <details>
 <summary>3. Projekt in einen Docker Container umsiedeln</summary>
 </details>
