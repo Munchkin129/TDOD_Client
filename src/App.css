@@ -56,6 +56,7 @@
   justify-content: center; 
   z-index: 10;
   font-size: 25px;
+  padding: 10px; 
 }
 
 .LabelList { 
@@ -87,7 +88,7 @@
   text-decoration: underline;
 }
 
-.LabelButton {
+.label-list div {
   padding: 10px 20px;
   margin: 10px;
   border: 1px solid #ddd;
@@ -96,9 +97,11 @@
   background-color: #f8f8f8; 
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
   transition: background-color 0.3s; 
+  cursor: pointer; 
+  margin-bottom: 5px; 
 }
 
-.LabelButton:hover {
+.label-list div:hover {
   background-color: #ececec; 
 }
 
@@ -106,9 +109,28 @@
   display: flex;
   flex-direction: column;
   padding: 10px; 
+  z-index: 10;
 }
 
-.label-list div {
-  cursor: pointer; 
-  margin-bottom: 5px; 
+@media (max-width: 768px) {
+  .header {
+      padding: 20px;
+      text-align: center;
+  }
+  
+  .liveFeed, .statusIndicator, .labelList, .footer {
+      margin: 10px;
+  }
+}
+
+/* Sehr kleine Geräte (Handys, 480px und darunter) */
+@media (max-width: 480px) {
+  .header h1 {
+      font-size: 20px;
+  }
+  
+  .webcamStyle, .canvasStyle {
+      width: 100%;
+      height: auto;
+  }
 }

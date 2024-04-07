@@ -4,6 +4,7 @@ import LabelContext from './LabelContext';
 import * as tf from "@tensorflow/tfjs";
 import Webcam from "react-webcam";
 
+import LoadingIndicator from './LoadingIndicator';
 import LabelList from "./LabelList";
 import "./App.css";
 
@@ -32,7 +33,8 @@ function App() {
   
   const [labels, setLabels] = useState({
     1: {name: 'ThumbsUp', color: 'green'},
-    2: {name: 'ThumbsDown', color: 'blue'}
+    2: {name: 'ThumbsDown', color: 'blue'},
+    3: {name: 'Thirds', color: 'red'}
   });
 
   const changeColor = (index, newColor) => {
@@ -44,6 +46,7 @@ function App() {
     }
   };  
 
+  const [isLoading, setIsLoading] = useState(false);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [boxesAssigned, setBoxesAssigned] = useState(false);
 
@@ -82,10 +85,14 @@ function App() {
 
   // Main function Eine Funktion, die ein TensorFlow-Modell lädt und eine Schleife startet, um Vorhersagen zu machen.
   const runCoco = async (currenntLabels) => {
+
+    setIsLoading(true);
+
     try {
       // 3. TODO - Load network 
       const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');
       updateModelStatus(true);
+      setIsLoading(false);
       // Überprüfen, ob das Modell erfolgreich geladen wurde
       if (!net) {
         throw new Error('Failed to load the model.');
@@ -106,6 +113,7 @@ function App() {
     } catch (error) {
       console.error('Error loading the model:', error);
       console.log(modelIsLoaded);
+      setIsLoading(false);
     }
   };
   
@@ -211,6 +219,8 @@ function App() {
   return (
     <LabelContext.Provider value={{ labels }}>
     <div className="App">
+      
+    {isLoading && <LoadingIndicator />}
       <div className="Header">
       <h1>Object Detection</h1>
       </div>
