@@ -25,8 +25,8 @@ function StatusIndicator({ label, status }) {
   );
 }
 
-const VIDEO_WIDTH = 640;
-const VIDEO_HEIGHT = 480;
+const VIDEO_WIDTH = "640px";
+const VIDEO_HEIGHT = "480px";
 const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
 
 function App() {
@@ -35,8 +35,7 @@ function App() {
   
   const [labels, setLabels] = useState({
     1: {name: 'ThumbsUp', color: 'green'},
-    2: {name: 'ThumbsDown', color: 'blue'},
-    3: {name: 'Thirds', color: 'red'}
+    2: {name: 'ThumbsDown', color: 'blue'}
   });
 
   const changeColor = (index, newColor) => {
@@ -94,7 +93,6 @@ function App() {
   const runCoco = async (currenntLabels) => {
 
     setIsLoading(true);
-    setLoadingProgress(2);
 
     try {
       // 3. TODO - Load network 
@@ -126,6 +124,12 @@ function App() {
       setDisplayMessage({ hasMessage: true, message: "Fehler beim Laden des Models." , color: "rgba(255, 0, 0, 0.75)"});
     } finally {
       setIsLoading(false);
+
+      const timer = setTimeout(() => {
+        setIsLoading(true);
+      }, 1000);
+  
+      return () => clearTimeout(timer);
     }
   };
   
@@ -173,6 +177,7 @@ function App() {
           console.log("classes: ", i);
           classesIndex = i;
           classesIndexisCompleted = true;
+          setIsLoading(false);
           setLoadingProgress(30);
         } else if (((dataArray[0] >= 0) && (dataArray[0] <= 1)) && ((dataArray[50] >= 0) && (dataArray[50] <= 1)) && (!scoresIndexisCompleted)) {
           console.log("scores: ", i);
@@ -248,15 +253,12 @@ function App() {
     <LabelContext.Provider value={{ labels }}>
     <div className="App"> 
 
-      <div className="loading-container">
-        {isLoading && <LoadingIndicator />}
-        {loadingProgress > 0 && !isLoading && <ProgressCircle progress={loadingProgress} />}
-      </div>
+      {isLoading && <LoadingIndicator />}
+      {loadingProgress > 0 && !isLoading && <ProgressCircle progress={loadingProgress} />}
 
-      {displayMessage.hasMessage && <div 
-      style={{ backgroundColor: displayMessage.color }}
-      className="message">
-      {displayMessage.message}</div>}
+      {displayMessage.hasMessage && <div style={{ backgroundColor: displayMessage.color }}
+        className="message">
+        {displayMessage.message}</div>}
 
       <div className="Header">
       <h1>Object Detection</h1>
@@ -266,10 +268,18 @@ function App() {
           ref={webcamRef}
           muted={true} 
           className="webcamStyle"
+          style={{  
+            width: VIDEO_WIDTH,
+            height: VIDEO_HEIGHT
+          }}
         />
         <canvas
           ref={canvasRef}
           className="canvasStyle"
+          style={{  
+            width: VIDEO_WIDTH,
+            height: VIDEO_HEIGHT
+          }}
         />
       </div>
       <div className="StatusIndicator">
