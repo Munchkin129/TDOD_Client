@@ -6,6 +6,7 @@ import Webcam from "react-webcam";
 
 import LoadingIndicator from './LoadingIndicator';
 import LabelList from "./LabelList";
+import StatusIndicator from "./StatusIndicator";
 import ProgressCircle from "./ProgressCircle";
 
 import "./App.css";
@@ -15,37 +16,9 @@ import { nextFrame } from "@tensorflow/tfjs";
 import {drawRect} from "./utilities"; 
 import { expandShapeToKeepDim } from "@tensorflow/tfjs-core/dist/ops/axis_util";
 
-function StatusIndicator({ label, status }) {
-  const color = status ? "green" : "red";
-
-  return (
-    <div style={{ color }}>
-      {label}: {status ? "Loaded" : "Not Loaded"}
-    </div>
-  );
-}
-
-//dummy
-function TestComponent() {
-  const [triggerEffect, setTriggerEffect] = useState(false);
-
-  const handleButtonClick = () => {
-    // Zustand ändern, um den useEffect-Hook auszulösen
-    setTriggerEffect(!triggerEffect);
-  };
-
-  return (
-    <div>
-      <button onClick={handleButtonClick}>Effekt auslösen</button>
-    </div>
-  );
-}
-
 const VIDEO_WIDTH = "640px";
 const VIDEO_HEIGHT = "480px";
 const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function App() {
   const webcamRef = useRef(null);
@@ -143,11 +116,12 @@ function App() {
     } finally {
       setIsLoading(false);
 
+      if(modelLoaded){
       const timer = setTimeout(() => {
         setIsLoading(true);
       }, 1000);
-  
       return () => clearTimeout(timer);
+      }
     }
   };
   
@@ -281,6 +255,7 @@ function App() {
       <div className="Header">
       <h1>Object Detection</h1>
       </div>
+
       <div className="LiveFeed">
         <Webcam
           ref={webcamRef}
@@ -299,14 +274,17 @@ function App() {
             height: VIDEO_HEIGHT
           }}
         />
+
       </div>
       <div className="StatusIndicator">
         <StatusIndicator label="Model" status={modelLoaded} />
         <StatusIndicator label="Boxes Assigned" status={boxesAssigned} />
       </div>
+
       <div className="LabelList">
         <LabelList changeColor={changeColor}/>
       </div>
+
       <div className="Footer">
       <p>© 2024 Dirk Hofmann. <a href="https://git.ai.fh-erfurt.de/ma4163sp1/ba_project/ss23/ba_project_ss23_hofmann" target="_blank" rel="noopener noreferrer" className="FooterLink">GitLab.</a></p>
       </div>
