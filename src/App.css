@@ -10,7 +10,8 @@
     "Footer Footer Footer";
   text-align: center;
   justify-content: center;
-  background-color: #282c34;
+  background: rgb(2,0,36);
+  background: radial-gradient(circle, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
   font-family: 'Open Sans', sans-serif;
   height: 100vh;
 }
@@ -19,8 +20,7 @@
   grid-area: Header; 
   width: 100%;
   padding: 20px 0;
-  background-color: #282c34;
-  color: #005a9c;
+  color: #f6f686;
   text-align: center;
   font-size: 24px;
 }
@@ -71,7 +71,7 @@
   grid-area: Footer;
   width: 100%;
   padding: 10px 0;
-  background-color: #333;
+  background: #090979;
   color: white;
   text-align: center;
   position: fixed;
@@ -93,7 +93,7 @@
   margin: 10px;
   border: 1px solid #ddd;
   border-radius: 20px;
-  background-color: #f8f8f8; 
+  background: #FDF7FA; 
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
   transition: background-color 0.3s; 
   margin-bottom: 5px; 
@@ -104,7 +104,7 @@ cursor: pointer;
 }
 
 .label-list div:hover, .StatusIndicator div:hover {
-  background-color: #ececec; 
+  background: #ececec; 
 }
 
 .label-list {
