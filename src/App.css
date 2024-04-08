@@ -12,6 +12,11 @@
   justify-content: center;
   background: rgb(2,0,36);
   background: radial-gradient(circle, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  animation: pulseCircle 5s infinite ease-in-out;
   font-family: 'Open Sans', sans-serif;
   height: 100vh;
 }
@@ -37,8 +42,6 @@
   left: 0;
   right: 0;
   text-align: center;
-
-  opacity: 0;
 }
 
 .webcamStyle {
@@ -139,5 +142,14 @@ cursor: pointer;
   100% {
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+@keyframes pulseCircle {
+  0%, 100% {
+    background-size: 100% 100%;
+  }
+  50% {
+    background-size: 120% 120%;
   }
 }
