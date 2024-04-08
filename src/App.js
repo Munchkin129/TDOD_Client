@@ -1,6 +1,5 @@
 // Import dependencies
 import React, { useRef, useState, useEffect } from "react";
-import LabelContext from './LabelContext';
 import * as tf from "@tensorflow/tfjs";
 import Webcam from "react-webcam";
 
@@ -8,6 +7,7 @@ import LoadingIndicator from './LoadingIndicator';
 import LabelList from "./LabelList";
 import StatusIndicator from "./StatusIndicator";
 import ProgressCircle from "./ProgressCircle";
+import LabelContext from './LabelContext';
 
 import "./App.css";
 
@@ -19,6 +19,7 @@ import { expandShapeToKeepDim } from "@tensorflow/tfjs-core/dist/ops/axis_util";
 const VIDEO_WIDTH = "640px";
 const VIDEO_HEIGHT = "480px";
 const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
+const MODEL_URL = 'http://127.0.0.1:8080/model.json';
 
 function App() {
   const webcamRef = useRef(null);
@@ -87,7 +88,7 @@ function App() {
 
     try {
       // 3. TODO - Load network 
-      const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');
+      const net = await tf.loadGraphModel(MODEL_URL);
       updateModelStatus(true);
       setIsLoading(false);
 
