@@ -39,6 +39,8 @@
   text-align: center;
   width: 640px;
   height: 480px;
+
+  opacity: 0;
 }
 
 .webcamStyle {
@@ -112,25 +114,42 @@
   z-index: 10;
 }
 
-@media (max-width: 768px) {
-  .header {
-      padding: 20px;
-      text-align: center;
+.error-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 0, 0, 0.75);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
   }
-  
-  .liveFeed, .statusIndicator, .labelList, .footer {
-      margin: 10px;
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
   }
 }
 
-/* Sehr kleine Geräte (Handys, 480px und darunter) */
-@media (max-width: 480px) {
-  .header h1 {
-      font-size: 20px;
-  }
-  
-  .webcamStyle, .canvasStyle {
-      width: 100%;
-      height: auto;
-  }
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  height: 40px;
+  width: 40px;
 }

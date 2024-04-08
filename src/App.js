@@ -6,6 +6,8 @@ import Webcam from "react-webcam";
 
 import LoadingIndicator from './LoadingIndicator';
 import LabelList from "./LabelList";
+import ProgressCircle from "./ProgressCircle";
+
 import "./App.css";
 
 import { nextFrame } from "@tensorflow/tfjs";
@@ -47,6 +49,11 @@ function App() {
   };  
 
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingError, setLoadingError] = useState({ hasError: false, message: "" });
+
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+
   const [modelLoaded, setModelLoaded] = useState(false);
   const [boxesAssigned, setBoxesAssigned] = useState(false);
 
@@ -87,6 +94,7 @@ function App() {
   const runCoco = async (currenntLabels) => {
 
     setIsLoading(true);
+    setLoadingProgress(2);
 
     try {
       // 3. TODO - Load network 
@@ -112,7 +120,8 @@ function App() {
       setIntervalId(newIntervalID);
     } catch (error) {
       console.error('Error loading the model:', error);
-      console.log(modelIsLoaded);
+      setLoadingError({ hasError: true, message: "Fehler beim Laden des Models." });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -161,14 +170,18 @@ function App() {
           console.log("classes: ", i);
           classesIndex = i;
           classesIndexisCompleted = true;
+          setLoadingProgress(30);
         } else if (((dataArray[0] >= 0) && (dataArray[0] <= 1)) && ((dataArray[50] >= 0) && (dataArray[50] <= 1)) && (!scoresIndexisCompleted)) {
           console.log("scores: ", i);
           scoresIndex = i;
           scoresIndexisCompleted = true;
+          setLoadingProgress(60);
         } else if (dataArray[0].length === 4 && !boxesIndexisCompleted) {
           console.log("boxes: ", i);
           boxesIndex = i;
           boxesIndexisCompleted = true;
+          setLoadingProgress(100);
+          setTimeout(() => setLoadingProgress(0), 500);
         } else {
           console.log("übrig: ", i);
         }
@@ -216,11 +229,27 @@ function App() {
     console.log(labels);
   }, [labels]);
 
+  useEffect(() => {
+    if (loadingError.hasError) {
+      const timer = setTimeout(() => {
+        setLoadingError({ hasError: false, message: "" });
+      }, 5000);
+  
+      return () => clearTimeout(timer);
+    }
+  }, [loadingError.hasError]);
+
   return (
     <LabelContext.Provider value={{ labels }}>
-    <div className="App">
-      
-    {isLoading && <LoadingIndicator />}
+    <div className="App"> 
+
+      <div className="loading-container">
+        {isLoading && <LoadingIndicator />}
+        {loadingProgress > 0 && !isLoading && <ProgressCircle progress={loadingProgress} />}
+      </div>
+
+      {loadingError.hasError && <div className="error-message">{loadingError.message}</div>}
+
       <div className="Header">
       <h1>Object Detection</h1>
       </div>
