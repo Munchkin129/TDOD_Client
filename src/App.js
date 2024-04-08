@@ -29,13 +29,15 @@ const VIDEO_WIDTH = "640px";
 const VIDEO_HEIGHT = "480px";
 const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   
   const [labels, setLabels] = useState({
     1: {name: 'ThumbsUp', color: 'green'},
-    2: {name: 'ThumbsDown', color: 'blue'}
+    2: {name: 'ThumbsDown', color: 'blue'},
   });
 
   const changeColor = (index, newColor) => {
@@ -248,6 +250,25 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [displayMessage.hasMessage]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    sleep(3);
+    setIsLoading(false);
+    setDisplayMessage({ hasMessage: true, message: "Model erfolgreich geladen." , color: "rgba(0, 255, 0, 0.75)"});
+    sleep(4);
+    setIsLoading(true);
+    sleep(4);
+    setIsLoading(false);
+    setLoadingProgress(30);
+    sleep(1);
+    setLoadingProgress(60);
+    sleep(0.5);
+    setLoadingProgress(100);
+    sleep
+    setTimeout(() => setLoadingProgress(0), 500);
+    setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
+  })
 
   return (
     <LabelContext.Provider value={{ labels }}>
