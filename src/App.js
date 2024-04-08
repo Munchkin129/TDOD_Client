@@ -49,7 +49,7 @@ function App() {
   };  
 
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingError, setLoadingError] = useState({ hasError: false, message: "" });
+  const [displayMessage, setDisplayMessage] = useState({ hasMessage: false, message: "" , color: ""});
 
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -101,6 +101,9 @@ function App() {
       const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');
       updateModelStatus(true);
       setIsLoading(false);
+
+      setDisplayMessage({ hasMessage: true, message: "Model erfolgreich geladen." , color: "rgba(0, 255, 0, 0.75)"});
+
       // Überprüfen, ob das Modell erfolgreich geladen wurde
       if (!net) {
         throw new Error('Failed to load the model.');
@@ -120,7 +123,7 @@ function App() {
       setIntervalId(newIntervalID);
     } catch (error) {
       console.error('Error loading the model:', error);
-      setLoadingError({ hasError: true, message: "Fehler beim Laden des Models." });
+      setDisplayMessage({ hasMessage: true, message: "Fehler beim Laden des Models." , color: "rgba(255, 0, 0, 0.75)"});
     } finally {
       setIsLoading(false);
     }
@@ -182,6 +185,8 @@ function App() {
           boxesIndexisCompleted = true;
           setLoadingProgress(100);
           setTimeout(() => setLoadingProgress(0), 500);
+          setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
+
         } else {
           console.log("übrig: ", i);
         }
@@ -230,14 +235,14 @@ function App() {
   }, [labels]);
 
   useEffect(() => {
-    if (loadingError.hasError) {
+    if (displayMessage.hasMessage) {
       const timer = setTimeout(() => {
-        setLoadingError({ hasError: false, message: "" });
+        setDisplayMessage({ hasMessage: false, message: "" , color: ""});
       }, 5000);
   
       return () => clearTimeout(timer);
     }
-  }, [loadingError.hasError]);
+  }, [displayMessage.hasMessage]);
 
   return (
     <LabelContext.Provider value={{ labels }}>
@@ -248,7 +253,10 @@ function App() {
         {loadingProgress > 0 && !isLoading && <ProgressCircle progress={loadingProgress} />}
       </div>
 
-      {loadingError.hasError && <div className="error-message">{loadingError.message}</div>}
+      {displayMessage.hasMessage && <div 
+      style={{ backgroundColor: displayMessage.color }}
+      className="message">
+      {displayMessage.message}</div>}
 
       <div className="Header">
       <h1>Object Detection</h1>
