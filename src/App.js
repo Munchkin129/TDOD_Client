@@ -162,22 +162,24 @@ function App() {
     
           console.log(await obj[i].array());
 
-          if ((await obj[i].array())[0].length === 100) {
+          const dataArray = await obj[i].array();
+
+          if (dataArray[0].length === 100) {
             
-            const dataArray = (await obj[i].array())[0];
+            const firstElement = dataArray[0];
             console.log(i, dataArray);
 
-        if ((Number.isInteger(dataArray[0])) && (Number.isInteger((dataArray[50]))) && ((dataArray[0]) <= numberOfLabels) && ((dataArray[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
+        if ((Number.isInteger(firstElement[0])) && (Number.isInteger((firstElement[50]))) && ((firstElement[0]) <= numberOfLabels) && ((firstElement[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
           console.log("classes: ", i);
           classesIndex = i;
           classesIndexisCompleted = true;
           setLoadingProgress(currentProgress => currentProgress + 33);
-        } else if (((dataArray[0] >= 0) && (dataArray[0] <= 1)) && ((dataArray[50] >= 0) && (dataArray[50] <= 1)) && (!scoresIndexisCompleted)) {
+        } else if (((firstElement[0] >= 0) && (firstElement[0] <= 1)) && ((firstElement[50] >= 0) && (firstElement[50] <= 1)) && (!scoresIndexisCompleted)) {
           console.log("scores: ", i);
           scoresIndex = i;
           scoresIndexisCompleted = true;
           setLoadingProgress(currentProgress => currentProgress + 33);
-        } else if (dataArray[0].length === 4 && !boxesIndexisCompleted) {
+        } else if (firstElement[0].length === 4 && !boxesIndexisCompleted) {
           console.log("boxes: ", i);
           boxesIndex = i;
           boxesIndexisCompleted = true;
