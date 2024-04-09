@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import LabelContext from './LabelContext';
 
 // Define a drawing function
 export const drawRect = (boxes, classes, scores, threshold, imgWidth, imgHeight, ctx, labelMap)=>{

@@ -3,13 +3,14 @@ import React, { useRef, useState, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs";
 import Webcam from "react-webcam";
 
-import LoadingIndicator from './LoadingIndicator';
-import LabelList from "./LabelList";
-import StatusIndicator from "./StatusIndicator";
-import ProgressCircle from "./ProgressCircle";
-import LabelContext from './LabelContext';
+import LabelContext from './context/LabelContext';
 
-import "./App.css";
+import LoadingIndicator from './components/LoadingIndicator';
+import LabelList from "./components/LabelList";
+import StatusIndicator from "./components/StatusIndicator";
+import ProgressCircle from "./components/ProgressCircle";
+
+import "./styles/App.css";
 
 import { nextFrame } from "@tensorflow/tfjs";
 // 2. TODO - Import drawing utility here

@@ -1,5 +1,5 @@
 import React from 'react';
-import './ProgressCircle.css';
+import '../styles/ProgressCircle.css';
 
 const ProgressCircle = ({ progress }) => {
   const strokeDasharray = 251; // Umfang des Kreises (angenähert für den Radius von 40px)

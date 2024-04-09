@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import LabelContext from './LabelContext';
+import LabelContext from '../context/LabelContext';
 
 function LabelList({ changeColor }) {
     const { labels } = useContext(LabelContext);
