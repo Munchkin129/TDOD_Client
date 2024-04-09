@@ -1,32 +1,37 @@
-// Import dependencies
+// import react, tf and webcam
 import React, { useRef, useState, useEffect } from "react";
 import * as tf from "@tensorflow/tfjs";
 import Webcam from "react-webcam";
 
+// import context
 import LabelContext from './context/LabelContext';
 
+// import components
 import LoadingIndicator from './components/LoadingIndicator';
 import LabelList from "./components/LabelList";
 import StatusIndicator from "./components/StatusIndicator";
 import ProgressCircle from "./components/ProgressCircle";
 
+// import styles
 import "./styles/App.css";
 
-import { nextFrame } from "@tensorflow/tfjs";
-// 2. TODO - Import drawing utility here
+// import draw
 import {drawRect} from "./utilities"; 
-import { expandShapeToKeepDim } from "@tensorflow/tfjs-core/dist/ops/axis_util";
 
+// important constants
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
-const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
-const MODEL_URL = 'http://127.0.0.1:8080/model.json';
+const DETECTION_INTERVAL = 16.7;
 const ACCURACY = 0.4;
+
+// model host
+const MODEL_URL = 'http://127.0.0.1:8080/model.json';
 
 function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   
+  // exchangable labels
   const [labels, setLabels] = useState({
     1: {name: 'ThumbsUp', color: 'green'},
     2: {name: 'ThumbsDown', color: 'blue'},
@@ -34,6 +39,7 @@ function App() {
   
   const numberOfLabels = Object.keys(labels).length;;
 
+  // changes apperance of label colors
   const changeColor = (index, newColor) => {
     if (newColor && newColor.trim() !== "") {  
     setLabels(prevLabels => ({
@@ -43,20 +49,11 @@ function App() {
     }
   }; 
 
+  // feedback managing loadtime and status
   const [isLoading, setIsLoading] = useState(false);
   const [displayMessage, setDisplayMessage] = useState({ hasMessage: false, message: "" , color: ""});
 
   const [loadingProgress, setLoadingProgress] = useState(0);
-  
-  const [intervalId, setIntervalId] = useState(null);
-  
-  useEffect(() => {
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [intervalId]);
   
   const [modelLoaded, setModelLoaded] = useState(false);
   const updateModelStatus = (status) => {
@@ -68,8 +65,49 @@ function App() {
     setBoxesAssigned(status);
   };
 
-  // variables for detect function
+  // end visual loading process
+  useEffect(() => {
+    if (loadingProgress === 99) {
+      setLoadingProgress(100);
+      setTimeout(() => setLoadingProgress(0), 100);
+      setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
+      updateBoxesStatus(true);
+    }
+  }, [loadingProgress]);
 
+  // display messages
+  useEffect(() => {
+    if (displayMessage.hasMessage) {
+      const timer = setTimeout(() => {
+        setDisplayMessage({ hasMessage: false, message: "" , color: ""});
+      }, 5000);    
+      return () => clearTimeout(timer);
+      }
+  }, [displayMessage.hasMessage]);
+
+  // intervalId to limit handle one detection process
+  const [intervalId, setIntervalId] = useState(null);
+  
+  useEffect(() => {
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [intervalId]);
+
+  useEffect(() => {
+    runCoco(labels);
+    
+    // cleanup interval when labels change
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [labels]);
+
+  // variables for detect function
   let boxesIndexisCompleted = false;
   let classesIndexisCompleted = false;
   let scoresIndexisCompleted = false;
@@ -84,34 +122,34 @@ function App() {
     setIsLoading(true);
 
     try {
-      // 3. TODO - Load network 
+      // load network 
       const net = await tf.loadGraphModel(MODEL_URL);
       updateModelStatus(true);
       setIsLoading(false);
 
       setDisplayMessage({ hasMessage: true, message: "Model erfolgreich geladen." , color: "rgba(0, 255, 0, 0.75)"});
 
-      // Überprüfen, ob das Modell erfolgreich geladen wurde
+      // check if model loaded
       if (!net) {
         throw new Error('Failed to load the model.');
       }
 
-      // Clear any previous intervals
+      // clear any previous intervals
       if (intervalId) {
         clearInterval(intervalId);
       }
   
-      // Loop and detect hands Eine Funktion, die überprüft, ob Daten verfügbar sind, und dann das Modell verwendet, um Vorhersagen auf dem aktuellen Bild der Webcam zu machen. Sie zeichnet auch die Vorhersagen auf einem Canvas.
+      // loop and detect
       const newIntervalID = setInterval(() => {
         detect(net, currenntLabels);
       }, DETECTION_INTERVAL);
 
-      // Setup the new interval and save the interval ID
+      // setup the new interval and save the interval ID
       setIntervalId(newIntervalID);
     } catch (error) {
-      console.error('Error loading the model:', error);
       setDisplayMessage({ hasMessage: true, message: "Fehler beim Laden des Models." , color: "rgba(255, 0, 0, 0.75)"});
     } finally {
+      // loading feedback for user
       setIsLoading(false);
 
       const timer = setTimeout(() => {
@@ -122,7 +160,7 @@ function App() {
   };
   
 
-
+  // Eine Funktion, die überprüft, ob Daten verfügbar sind, und dann das Modell verwendet, um Vorhersagen auf dem aktuellen Bild der Webcam zu machen. Sie zeichnet auch die Vorhersagen auf einem Canvas.
   const detect = async (net, currenntLabels) => {
     // Check data is available
     if (
@@ -135,22 +173,21 @@ function App() {
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
 
-      // Set video width
+      // set video and canvas properties
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
 
-      // Set canvas height and width
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
 
-      // 4. TODO - Make Detections
+      // make Detections
       const img = tf.browser.fromPixels(video);
       const resized = tf.image.resizeBilinear(img, [640,480]);
       const casted = resized.cast('int32');
       const expanded = casted.expandDims(0);
       const obj = await net.executeAsync(expanded);
       
-      // allign boxes
+      // sort boxes
       if(!classesIndexisCompleted && !scoresIndexisCompleted && !boxesIndexisCompleted){
         setIsLoading(false);
 
@@ -194,15 +231,15 @@ function App() {
       const classes = await obj[classesIndex].array();
       const scores = await obj[scoresIndex].array();
     
-      // Draw mesh
+      // draw mesh
       const ctx = canvasRef.current.getContext("2d");
 
-      // 5. TODO - Update drawing utility
-      // drawSomething(obj, ctx)
+      // update drawing utility
         requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], ACCURACY, videoWidth, videoHeight, ctx, currenntLabels)}); 
 
       }  
       
+      // disope
       tf.dispose(img);
       tf.dispose(resized);
       tf.dispose(casted);
@@ -211,36 +248,6 @@ function App() {
 
     }
   }
-
-  useEffect(() => {
-    if (loadingProgress === 99) {
-      setLoadingProgress(100);
-      setTimeout(() => setLoadingProgress(0), 100);
-      setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
-      updateBoxesStatus(true);
-    }
-  }, [loadingProgress]);
-
-  useEffect(() => {
-    runCoco(labels);
-    
-    // Cleanup interval when labels change
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [labels]);
-
-  useEffect(() => {
-    if (displayMessage.hasMessage) {
-      const timer = setTimeout(() => {
-        setDisplayMessage({ hasMessage: false, message: "" , color: ""});
-      }, 5000);
-  
-      return () => clearTimeout(timer);
-    }
-  }, [displayMessage.hasMessage]);
 
   return (
     <LabelContext.Provider value={{ labels }}>
