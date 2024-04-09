@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import LabelContext from '../context/LabelContext';
 
+// to display all the labels and switch color
 function LabelList({ changeColor }) {
     const { labels } = useContext(LabelContext);
   

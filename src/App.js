@@ -39,19 +39,15 @@ function App() {
         [index]: { ...prevLabels[index], color: newColor }
       }));
     }
-  };  
+  }; 
 
   const [isLoading, setIsLoading] = useState(false);
   const [displayMessage, setDisplayMessage] = useState({ hasMessage: false, message: "" , color: ""});
 
   const [loadingProgress, setLoadingProgress] = useState(0);
-
-
-  const [modelLoaded, setModelLoaded] = useState(false);
-  const [boxesAssigned, setBoxesAssigned] = useState(false);
-
+  
   const [intervalId, setIntervalId] = useState(null);
-
+  
   useEffect(() => {
     return () => {
       if (intervalId) {
@@ -59,16 +55,16 @@ function App() {
       }
     };
   }, [intervalId]);
-
+  
+  const [modelLoaded, setModelLoaded] = useState(false);
   const updateModelStatus = (status) => {
     setModelLoaded(status);
   };
-
+  
+  const [boxesAssigned, setBoxesAssigned] = useState(false);
   const updateBoxesStatus = (status) => {
     setBoxesAssigned(status);
   };
-
-  let modelIsLoaded = false;
 
   const numberOfLabels = 2;
 
@@ -157,7 +153,10 @@ function App() {
       const expanded = casted.expandDims(0)
       const obj = await net.executeAsync(expanded)
       
+      // array get alignet to boxes
       if(index <= counter){
+
+        setIsLoading(false);
 
         for (let i = 0; i < 8; i++) {
     
@@ -172,21 +171,17 @@ function App() {
           console.log("classes: ", i);
           classesIndex = i;
           classesIndexisCompleted = true;
-          setIsLoading(false);
-          setLoadingProgress(30);
+          setLoadingProgress(currentProgress => currentProgress + 33);
         } else if (((dataArray[0] >= 0) && (dataArray[0] <= 1)) && ((dataArray[50] >= 0) && (dataArray[50] <= 1)) && (!scoresIndexisCompleted)) {
           console.log("scores: ", i);
           scoresIndex = i;
           scoresIndexisCompleted = true;
-          setLoadingProgress(60);
+          setLoadingProgress(currentProgress => currentProgress + 33);
         } else if (dataArray[0].length === 4 && !boxesIndexisCompleted) {
           console.log("boxes: ", i);
           boxesIndex = i;
           boxesIndexisCompleted = true;
-          setLoadingProgress(100);
-          setTimeout(() => setLoadingProgress(0), 10);
-          setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
-
+          setLoadingProgress(currentProgress => currentProgress + 33);
         } else {
           console.log("übrig: ", i);
         }
@@ -218,6 +213,14 @@ function App() {
 
     }
   };
+
+  useEffect(() => {
+    if (loadingProgress === 99) {
+      setLoadingProgress(100);
+      setTimeout(() => setLoadingProgress(0), 100);
+      setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
+    }
+  }, [loadingProgress]);
 
   useEffect(() => {
     runCoco(labels);

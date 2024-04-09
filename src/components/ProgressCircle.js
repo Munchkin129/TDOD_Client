@@ -1,8 +1,9 @@
 import React from 'react';
 import '../styles/ProgressCircle.css';
 
+// filing circle to show progression e.g. of box assigment
 const ProgressCircle = ({ progress }) => {
-  const strokeDasharray = 251; // Umfang des Kreises (angenähert für den Radius von 40px)
+  const strokeDasharray = 251;
   const strokeDashoffset = ((100 - progress) / 100) * strokeDasharray;
 
   return (
