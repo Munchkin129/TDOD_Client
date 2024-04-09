@@ -17,11 +17,11 @@ import { nextFrame } from "@tensorflow/tfjs";
 import {drawRect} from "./utilities"; 
 import { expandShapeToKeepDim } from "@tensorflow/tfjs-core/dist/ops/axis_util";
 
-const VIDEO_WIDTH = "640px";
-const VIDEO_HEIGHT = "480px";
+const VIDEO_WIDTH = 640;
+const VIDEO_HEIGHT = 480;
 const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
 const MODEL_URL = 'http://127.0.0.1:8080/model.json';
-const ACCURACY = 0.8;
+const ACCURACY = 0.4;
 
 function App() {
   const webcamRef = useRef(null);
@@ -31,6 +31,8 @@ function App() {
     1: {name: 'ThumbsUp', color: 'green'},
     2: {name: 'ThumbsDown', color: 'blue'},
   });
+  
+  const numberOfLabels = Object.keys(labels).length;;
 
   const changeColor = (index, newColor) => {
     if (newColor && newColor.trim() !== "") {  
@@ -61,19 +63,16 @@ function App() {
     setModelLoaded(status);
   };
   
-  const [boxesAssigned, setBoxesAssigned] = useState(false);
+ const [boxesAssigned, setBoxesAssigned] = useState(false); 
   const updateBoxesStatus = (status) => {
     setBoxesAssigned(status);
   };
 
-  const numberOfLabels = 2;
+  // variables for detect function
 
   let boxesIndexisCompleted = false;
   let classesIndexisCompleted = false;
   let scoresIndexisCompleted = false;
-
-  let counter = 0;
-  let index = 0;
 
   let boxesIndex = 0;
   let classesIndex = 0;
@@ -115,12 +114,10 @@ function App() {
     } finally {
       setIsLoading(false);
 
-      if(modelLoaded){
       const timer = setTimeout(() => {
         setIsLoading(true);
       }, 1000);
       return () => clearTimeout(timer);
-      }
     }
   };
   
@@ -147,57 +144,55 @@ function App() {
       canvasRef.current.height = videoHeight;
 
       // 4. TODO - Make Detections
-      const img = tf.browser.fromPixels(video)
-      const resized = tf.image.resizeBilinear(img, [640,480])
-      const casted = resized.cast('int32')
-      const expanded = casted.expandDims(0)
-      const obj = await net.executeAsync(expanded)
+      const img = tf.browser.fromPixels(video);
+      const resized = tf.image.resizeBilinear(img, [640,480]);
+      const casted = resized.cast('int32');
+      const expanded = casted.expandDims(0);
+      const obj = await net.executeAsync(expanded);
       
-      // array get alignet to boxes
-      if(index <= counter){
-
+      // allign boxes
+      if(!classesIndexisCompleted && !scoresIndexisCompleted && !boxesIndexisCompleted){
         setIsLoading(false);
 
         for (let i = 0; i < 8; i++) {
-    
+
           console.log(await obj[i].array());
 
           const dataArray = await obj[i].array();
 
           if (dataArray[0].length === 100) {
-            
+        
             const firstElement = dataArray[0];
             console.log(i, dataArray);
 
-        if ((Number.isInteger(firstElement[0])) && (Number.isInteger((firstElement[50]))) && ((firstElement[0]) <= numberOfLabels) && ((firstElement[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
-          console.log("classes: ", i);
-          classesIndex = i;
-          classesIndexisCompleted = true;
-          setLoadingProgress(currentProgress => currentProgress + 33);
-        } else if (((firstElement[0] >= 0) && (firstElement[0] <= 1)) && ((firstElement[50] >= 0) && (firstElement[50] <= 1)) && (!scoresIndexisCompleted)) {
-          console.log("scores: ", i);
-          scoresIndex = i;
-          scoresIndexisCompleted = true;
-          setLoadingProgress(currentProgress => currentProgress + 33);
-        } else if (firstElement[0].length === 4 && !boxesIndexisCompleted) {
-          console.log("boxes: ", i);
-          boxesIndex = i;
-          boxesIndexisCompleted = true;
-          setLoadingProgress(currentProgress => currentProgress + 33);
-        } else {
-          console.log("übrig: ", i);
+            if ((Number.isInteger(firstElement[0])) && (Number.isInteger((firstElement[50]))) && ((firstElement[0]) <= numberOfLabels) && ((firstElement[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
+              console.log("classes: ", i);
+              classesIndex = i;
+              classesIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else if (((firstElement[0] >= 0) && (firstElement[0] <= 1)) && ((firstElement[50] >= 0) && (firstElement[50] <= 1)) && (!scoresIndexisCompleted)) {
+              console.log("scores: ", i);
+              scoresIndex = i;
+              scoresIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else if (firstElement[0].length === 4 && !boxesIndexisCompleted) {
+              console.log("boxes: ", i);
+              boxesIndex = i;
+              boxesIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else {
+              console.log("übrig: ", i);
+            }
+          }
         }
       }
-      index++;
-      }
-    }
       
-     if (boxesIndexisCompleted && classesIndexisCompleted && scoresIndexisCompleted) {
-      updateBoxesStatus(true);
-      // console.log(boxesIndex,classesIndex,scoresIndex);
-      const boxes = await obj[boxesIndex].array()
-      const classes = await obj[classesIndex].array()
-      const scores = await obj[scoresIndex].array()
+      // draw detecions
+     if (classesIndexisCompleted && scoresIndexisCompleted && boxesIndexisCompleted) {
+
+      const boxes = await obj[boxesIndex].array();
+      const classes = await obj[classesIndex].array();
+      const scores = await obj[scoresIndex].array();
     
       // Draw mesh
       const ctx = canvasRef.current.getContext("2d");
@@ -205,22 +200,24 @@ function App() {
       // 5. TODO - Update drawing utility
       // drawSomething(obj, ctx)
         requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], ACCURACY, videoWidth, videoHeight, ctx, currenntLabels)}); 
-      }  
 
-      tf.dispose(img)
-      tf.dispose(resized)
-      tf.dispose(casted)
-      tf.dispose(expanded)
-      tf.dispose(obj)
+      }  
+      
+      tf.dispose(img);
+      tf.dispose(resized);
+      tf.dispose(casted);
+      tf.dispose(expanded);
+      tf.dispose(obj);
 
     }
-  };
+  }
 
   useEffect(() => {
     if (loadingProgress === 99) {
       setLoadingProgress(100);
       setTimeout(() => setLoadingProgress(0), 100);
       setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
+      updateBoxesStatus(true);
     }
   }, [loadingProgress]);
 
@@ -266,16 +263,16 @@ function App() {
           muted={true} 
           className="webcamStyle"
           style={{  
-            width: VIDEO_WIDTH,
-            height: VIDEO_HEIGHT
+            width: `${VIDEO_WIDTH}px`,
+            height: `${VIDEO_HEIGHT}px`
           }}
         />
         <canvas
           ref={canvasRef}
           className="canvasStyle"
           style={{  
-            width: VIDEO_WIDTH,
-            height: VIDEO_HEIGHT
+            width: `${VIDEO_WIDTH}px`,
+            height: `${VIDEO_HEIGHT}px`
           }}
         />
 
