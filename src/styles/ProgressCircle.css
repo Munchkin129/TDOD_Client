@@ -1,4 +1,4 @@
-.progress-circle {
+.progressCircle {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,11 +10,11 @@
   z-index: 999;
   }
   
-  .progress-back {
+  .progressBack {
     stroke: rgba(0, 0, 0, 0.1);
   }
   
-  .progress-bar {
+  .progressBar {
     stroke: #3498db;
     transition: stroke-dashoffset 0.5s ease-out;
   } 

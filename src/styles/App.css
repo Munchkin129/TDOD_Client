@@ -1,4 +1,4 @@
-.App {  
+.app {  
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   grid-template-rows: 1fr 2fr 1fr;
@@ -21,7 +21,7 @@
   height: 100vh;
 }
 
-.Header { 
+.header { 
   grid-area: Header; 
   width: 100%;
   padding: 20px 0;
@@ -30,9 +30,12 @@
   font-size: 24px;
 }
 
-.LiveFeed {
+.liveFeed {
   grid-area: LiveFeed; 
-  position: relative;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  height: 100%;
 }
 
 .webcamStyle, .canvasStyle {
@@ -52,7 +55,7 @@
   z-index: 9;
 }
 
-.StatusIndicator {
+.statusIndicator {
   grid-area: StatusIndicator; 
   display: flex;
   flex-direction: column;
@@ -62,7 +65,7 @@
   padding: 10px; 
 }
 
-.LabelList { 
+.labelList { 
   grid-area: LabelList;
   display: flex;
   flex-direction: column;
@@ -72,28 +75,7 @@
   padding: 10px;
 }
 
-.Footer { 
-  grid-area: Footer;
-  width: 100%;
-  padding: 10px 0;
-  background: #090979;
-  color: white;
-  text-align: center;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-}
-
-.FooterLink{
-  color: #007bff;
-  text-decoration: none;
-}
-
-.FooterLink:hover {
-  text-decoration: underline;
-}
-
-.label-list div, .StatusIndicator div {
+.label, .statusIndicator div {
   padding: 10px 20px;
   margin: 10px;
   border: 1px solid #ddd;
@@ -104,19 +86,12 @@
   margin-bottom: 5px; 
 }
 
-.label-list div {
+.label {
 cursor: pointer; 
 }
 
-.label-list div:hover, .StatusIndicator div:hover {
+.label:hover, .statusIndicator div:hover {
   background: #ececec; 
-}
-
-.label-list {
-  display: flex;
-  flex-direction: column;
-  padding: 10px; 
-  z-index: 10;
 }
 
 .message {
@@ -130,6 +105,27 @@ cursor: pointer;
   border-radius: 10px;
   z-index: 1000;
   animation: fadeOut 5s forwards;
+}
+
+.footer { 
+  grid-area: Footer;
+  width: 100%;
+  padding: 10px 0;
+  background: #090979;
+  color: white;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+
+.footerLink{
+  color: #007bff;
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
 }
 
 @keyframes fadeOut {
@@ -151,5 +147,11 @@ cursor: pointer;
   }
   50% {
     background-size: 120% 120%;
+  }
+}
+
+@media (max-width: 1249px) {
+  .StatusIndicator, .label-list {
+    display: none;
   }
 }

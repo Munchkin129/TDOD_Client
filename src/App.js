@@ -16,13 +16,13 @@ import ProgressCircle from "./components/ProgressCircle";
 import "./styles/App.css";
 
 // import draw
-import {drawRect} from "./utilities"; 
+import {drawRect} from "./utilities/utilities"; 
 
 // important constants
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
 const DETECTION_INTERVAL = 16.7;
-const ACCURACY = 0.4;
+const ACCURACY = 0.7;
 
 // model host
 const MODEL_URL = 'http://127.0.0.1:8080/model.json';
@@ -251,7 +251,7 @@ function App() {
 
   return (
     <LabelContext.Provider value={{ labels }}>
-    <div className="App"> 
+    <div className="app"> 
 
       {isLoading && <LoadingIndicator />}
       {loadingProgress > 0 && !isLoading && <ProgressCircle progress={loadingProgress} />}
@@ -260,11 +260,11 @@ function App() {
         className="message">
         {displayMessage.message}</div>}
 
-      <div className="Header">
+      <div className="header">
       <h1>Object Detection</h1>
       </div>
 
-      <div className="LiveFeed">
+      <div className="liveFeed">
         <Webcam
           ref={webcamRef}
           muted={true} 
@@ -284,16 +284,16 @@ function App() {
         />
 
       </div>
-      <div className="StatusIndicator">
+      <div className="statusIndicator">
         <StatusIndicator label="Model" status={modelLoaded} />
         <StatusIndicator label="Boxes Assigned" status={boxesAssigned} />
       </div>
 
-      <div className="LabelList">
+      <div className="labelList">
         <LabelList changeColor={changeColor}/>
       </div>
 
-      <div className="Footer">
+      <div className="footer">
       <p>© 2024 Dirk Hofmann. <a href="https://git.ai.fh-erfurt.de/ma4163sp1/ba_project/ss23/ba_project_ss23_hofmann" target="_blank" rel="noopener noreferrer" className="FooterLink">GitLab.</a></p>
       </div>
     </div>

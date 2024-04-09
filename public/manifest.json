@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Object Detection",
+  "name": "Object Detection through Webcam by Dirk",
   "icons": [
     {
       "src": "favicon.ico",

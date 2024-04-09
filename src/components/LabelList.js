@@ -13,9 +13,9 @@ function LabelList({ changeColor }) {
     };
   
     return (
-      <div className="label-list">
+      <div className="labelList">
         {Object.entries(labels).map(([index, label]) => (
-          <div key={index} onClick={() => handleClick(index)} style={{ color: label.color }}>
+          <div className='label' key={index} onClick={() => handleClick(index)} style={{ color: label.color }}>
             {label.name}
           </div>
         ))}

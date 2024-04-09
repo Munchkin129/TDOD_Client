@@ -7,10 +7,10 @@ const ProgressCircle = ({ progress }) => {
   const strokeDashoffset = ((100 - progress) / 100) * strokeDasharray;
 
   return (
-    <div className="progress-circle">
+    <div className="progressCircle">
       <svg width="100" height="100" viewBox="0 0 100 100">
         <circle
-          className="progress-back"
+          className="progressBack"
           cx="50"
           cy="50"
           r="40"
@@ -18,7 +18,7 @@ const ProgressCircle = ({ progress }) => {
           fill="none"
         />
         <circle
-          className="progress-bar"
+          className="progressBar"
           transform="rotate(-90, 50, 50)"
           cx="50"
           cy="50"
