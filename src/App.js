@@ -20,6 +20,7 @@ const VIDEO_WIDTH = "640px";
 const VIDEO_HEIGHT = "480px";
 const DETECTION_INTERVAL = 16.7; // Zeit in ms zwischen den Vorhersagen
 const MODEL_URL = 'http://127.0.0.1:8080/model.json';
+const ACCURACY = 0.8;
 
 function App() {
   const webcamRef = useRef(null);
@@ -182,7 +183,7 @@ function App() {
           boxesIndex = i;
           boxesIndexisCompleted = true;
           setLoadingProgress(100);
-          setTimeout(() => setLoadingProgress(0), 500);
+          setTimeout(() => setLoadingProgress(0), 10);
           setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
 
         } else {
@@ -205,7 +206,7 @@ function App() {
 
       // 5. TODO - Update drawing utility
       // drawSomething(obj, ctx)
-        requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], 0.4, videoWidth, videoHeight, ctx, currenntLabels)}); 
+        requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], ACCURACY, videoWidth, videoHeight, ctx, currenntLabels)}); 
       }  
 
       tf.dispose(img)
@@ -226,10 +227,6 @@ function App() {
         clearInterval(intervalId);
       }
     };
-  }, [labels]);
-
-  useEffect(() => {
-    console.log(labels);
   }, [labels]);
 
   useEffect(() => {
