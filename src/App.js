@@ -1,93 +1,167 @@
-// Import dependencies
+// import react, tf and webcam
 import React, { useRef, useState, useEffect } from "react";
-import LabelContext from './LabelContext';
 import * as tf from "@tensorflow/tfjs";
 import Webcam from "react-webcam";
 
-import LabelList from "./LabelList";
-import "./App.css";
+// import context
+import LabelContext from './context/LabelContext';
 
-import { nextFrame } from "@tensorflow/tfjs";
-// 2. TODO - Import drawing utility here
-import {drawRect} from "./utilities"; 
-import { expandShapeToKeepDim } from "@tensorflow/tfjs-core/dist/ops/axis_util";
+// import components
+import LoadingIndicator from './components/LoadingIndicator';
+import LabelList from "./components/LabelList";
+import StatusIndicator from "./components/StatusIndicator";
+import ProgressCircle from "./components/ProgressCircle";
 
-function StatusIndicator({ label, status }) {
-  const color = status ? "green" : "red";
+// import styles
+import "./styles/App.css";
 
-  return (
-    <div style={{ color }}>
-      {label}: {status ? "Loaded" : "Not Loaded"}
-    </div>
-  );
-}
+// import draw
+import {drawRect} from "./utilities/utilities"; 
+
+// important constants
+const VIDEO_WIDTH = 640;
+const VIDEO_HEIGHT = 480;
+const DETECTION_INTERVAL = 16.7;
+const ACCURACY = 0.7;
+
+// model host
+const MODEL_URL = 'http://127.0.0.1:8080/model.json';
 
 function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   
+  // exchangable labels
   const [labels, setLabels] = useState({
     1: {name: 'ThumbsUp', color: 'green'},
-    2: {name: 'ThumbsDown', color: 'blue'}
+    2: {name: 'ThumbsDown', color: 'blue'},
   });
+  
+  const numberOfLabels = Object.keys(labels).length;;
 
+  // changes apperance of label colors
   const changeColor = (index, newColor) => {
+    if (newColor && newColor.trim() !== "") {  
     setLabels(prevLabels => ({
-      ...prevLabels,
-      [index]: { ...prevLabels[index], color: newColor }
-    }));
-  };  
+        ...prevLabels,
+        [index]: { ...prevLabels[index], color: newColor }
+      }));
+    }
+  }; 
 
+  // feedback managing loadtime and status
+  const [isLoading, setIsLoading] = useState(false);
+  const [displayMessage, setDisplayMessage] = useState({ hasMessage: false, message: "" , color: ""});
+
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
   const [modelLoaded, setModelLoaded] = useState(false);
-  const [boxesAssigned, setBoxesAssigned] = useState(false);
-
   const updateModelStatus = (status) => {
     setModelLoaded(status);
   };
-
+  
+ const [boxesAssigned, setBoxesAssigned] = useState(false); 
   const updateBoxesStatus = (status) => {
     setBoxesAssigned(status);
   };
 
-  let modelIsLoaded = false;
+  // end visual loading process
+  useEffect(() => {
+    if (loadingProgress === 99) {
+      setLoadingProgress(100);
+      setTimeout(() => setLoadingProgress(0), 100);
+      setDisplayMessage({ hasMessage: true, message: "Zuordnung erfolgreich." , color: "rgba(0, 255, 0, 0.75)"});
+      updateBoxesStatus(true);
+    }
+  }, [loadingProgress]);
 
-  const numberOfLabels = 2;
+  // display messages
+  useEffect(() => {
+    if (displayMessage.hasMessage) {
+      const timer = setTimeout(() => {
+        setDisplayMessage({ hasMessage: false, message: "" , color: ""});
+      }, 5000);    
+      return () => clearTimeout(timer);
+      }
+  }, [displayMessage.hasMessage]);
 
+  // intervalId to limit handle one detection process
+  const [intervalId, setIntervalId] = useState(null);
+  
+  useEffect(() => {
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [intervalId]);
+
+  useEffect(() => {
+    runCoco(labels);
+    
+    // cleanup interval when labels change
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [labels]);
+
+  // variables for detect function
   let boxesIndexisCompleted = false;
   let classesIndexisCompleted = false;
   let scoresIndexisCompleted = false;
-
-  let counter = 0;
-  let index = 0;
 
   let boxesIndex = 0;
   let classesIndex = 0;
   let scoresIndex = 0;
 
   // Main function Eine Funktion, die ein TensorFlow-Modell lädt und eine Schleife startet, um Vorhersagen zu machen.
-  const runCoco = async () => {
+  const runCoco = async (currenntLabels) => {
+
+    setIsLoading(true);
+
     try {
-      // 3. TODO - Load network 
-      const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');
+      // load network 
+      const net = await tf.loadGraphModel(MODEL_URL);
       updateModelStatus(true);
-      // Überprüfen, ob das Modell erfolgreich geladen wurde
+      setIsLoading(false);
+
+      setDisplayMessage({ hasMessage: true, message: "Model erfolgreich geladen." , color: "rgba(0, 255, 0, 0.75)"});
+
+      // check if model loaded
       if (!net) {
         throw new Error('Failed to load the model.');
       }
+
+      // clear any previous intervals
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
   
-      // Loop and detect hands Eine Funktion, die überprüft, ob Daten verfügbar sind, und dann das Modell verwendet, um Vorhersagen auf dem aktuellen Bild der Webcam zu machen. Sie zeichnet auch die Vorhersagen auf einem Canvas.
-      setInterval(() => {
-        detect(net);
-      }, 16.7);
+      // loop and detect
+      const newIntervalID = setInterval(() => {
+        detect(net, currenntLabels);
+      }, DETECTION_INTERVAL);
+
+      // setup the new interval and save the interval ID
+      setIntervalId(newIntervalID);
     } catch (error) {
-      console.error('Error loading the model:', error);
-      console.log(modelIsLoaded);
+      setDisplayMessage({ hasMessage: true, message: "Fehler beim Laden des Models." , color: "rgba(255, 0, 0, 0.75)"});
+    } finally {
+      // loading feedback for user
+      setIsLoading(false);
+
+      const timer = setTimeout(() => {
+        setIsLoading(true);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   };
   
 
-
-  const detect = async (net) => {
+  // Eine Funktion, die überprüft, ob Daten verfügbar sind, und dann das Modell verwendet, um Vorhersagen auf dem aktuellen Bild der Webcam zu machen. Sie zeichnet auch die Vorhersagen auf einem Canvas.
+  const detect = async (net, currenntLabels) => {
     // Check data is available
     if (
       typeof webcamRef.current !== "undefined" &&
@@ -99,189 +173,129 @@ function App() {
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
 
-      // Set video width
+      // set video and canvas properties
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
 
-      // Set canvas height and width
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
 
-      // 4. TODO - Make Detections
-      const img = tf.browser.fromPixels(video)
-      const resized = tf.image.resizeBilinear(img, [640,480])
-      const casted = resized.cast('int32')
-      const expanded = casted.expandDims(0)
-      const obj = await net.executeAsync(expanded)
+      // make Detections
+      const img = tf.browser.fromPixels(video);
+      const resized = tf.image.resizeBilinear(img, [640,480]);
+      const casted = resized.cast('int32');
+      const expanded = casted.expandDims(0);
+      const obj = await net.executeAsync(expanded);
       
-      if(index <= counter){
+      // sort boxes
+      if(!classesIndexisCompleted && !scoresIndexisCompleted && !boxesIndexisCompleted){
+        setIsLoading(false);
 
-        for (let i = 0; i <= 7; i++) {
-    
+        for (let i = 0; i < 8; i++) {
+
           console.log(await obj[i].array());
 
-          if ((await obj[i].array())[0].length === 100) {
-            
-            const dataArray = (await obj[i].array())[0];
+          const dataArray = await obj[i].array();
+
+          if (dataArray[0].length === 100) {
+        
+            const firstElement = dataArray[0];
             console.log(i, dataArray);
 
-        if ((Number.isInteger(dataArray[0])) && (Number.isInteger((dataArray[50]))) && ((dataArray[0]) <= numberOfLabels) && ((dataArray[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
-          console.log("classes: ", i);
-          classesIndex = i;
-          classesIndexisCompleted = true;
-        } else if (((dataArray[0] >= 0) && (dataArray[0] <= 1)) && ((dataArray[50] >= 0) && (dataArray[50] <= 1)) && (!scoresIndexisCompleted)) {
-          console.log("scores: ", i);
-          scoresIndex = i;
-          scoresIndexisCompleted = true;
-        } else if (dataArray[0].length === 4 && !boxesIndexisCompleted) {
-          console.log("boxes: ", i);
-          boxesIndex = i;
-          boxesIndexisCompleted = true;
-        } else {
-          console.log("übrig: ", i);
-        }
-      }
-      index++;
-      }
-    }
-    
-      
-      /*
-      if(!test1isCompleted && !test2isCompleted && !test3isCompleted)
-      {
-        for (let index = 0; index <= 6; index++) {
-          const currentArrayData = await obj[index]?.array();
-          
-          if (currentArrayData) {
-            const currentArray = currentArrayData[0]?.[0];
-        
-            if (currentArray) {
-              if (currentArray.length === 4 && currentArray.every((value) => value >= 0 && value <= 1 && !test1isCompleted)) {
-                // Bedingung für Boxes: 4 Einträge zwischen 0 und 1
-                console.log("Boxes:", currentArray, index);
-                test1isCompleted = true;
-              } else if (currentArray.length === 1 && Number.isInteger(currentArray[0]) && !test2isCompleted) {
-                // Bedingung für Classes: einen Eintrag und nur ganzzahlige Zahlen
-                console.log("Classes:", classes, index);
-                test2isCompleted = true;
-              } else if (currentArray.length === 1 && currentArray[0] >= 0 && currentArray[0] <= 1 && !test3isCompleted) {
-                // Bedingung für Scores: einen Eintrag zwischen 0 und 1
-                console.log("Scores:", scores, index);
-                test3isCompleted = true;
-              } else {
-                console.log(`Invalid currentArray structure for index ${index}:`, currentArray);
-              }
+            if ((Number.isInteger(firstElement[0])) && (Number.isInteger((firstElement[50]))) && ((firstElement[0]) <= numberOfLabels) && ((firstElement[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
+              console.log("classes: ", i);
+              classesIndex = i;
+              classesIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else if (((firstElement[0] >= 0) && (firstElement[0] <= 1)) && ((firstElement[50] >= 0) && (firstElement[50] <= 1)) && (!scoresIndexisCompleted)) {
+              console.log("scores: ", i);
+              scoresIndex = i;
+              scoresIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else if (firstElement[0].length === 4 && !boxesIndexisCompleted) {
+              console.log("boxes: ", i);
+              boxesIndex = i;
+              boxesIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
             } else {
-              console.log(`currentArray is undefined for index ${index}`);
+              console.log("übrig: ", i);
             }
-          } else {
-            console.log(`Data for index ${index} is undefined`);
           }
         }
       }
-      */
+      
+      // draw detecions
+     if (classesIndexisCompleted && scoresIndexisCompleted && boxesIndexisCompleted) {
 
-      /*
-      for (let index = 0; index <= 6; index++) {
-        const currentArrayData = await obj[index]?.array();
-        
-        if (currentArrayData) {
-          const currentArray = currentArrayData[0]?.[0];
-      
-          if (currentArray) {
-            if (currentArray.length === 4 && currentArray.every((value) => value >= 0 && value <= 1)) {
-              // Bedingung für Boxes: 4 Einträge zwischen 0 und 1
-              console.log("Boxes:", currentArray, index);
-              // Hier kannst du weiter mit den Boxes arbeiten...
-            } else if (currentArray.length === 1 && Number.isInteger(currentArray[0])) {
-              // Bedingung für Classes: einen Eintrag und nur ganzzahlige Zahlen
-              const classes = currentArray;
-              console.log("Classes:", classes, index);
-              // Hier kannst du weiter mit den Classes arbeiten...
-            } else if (currentArray.length === 1 && currentArray[0] >= 0 && currentArray[0] <= 1) {
-              // Bedingung für Scores: einen Eintrag zwischen 0 und 1
-              const scores = currentArray;
-              console.log("Scores:", scores, index);
-              // Hier kannst du weiter mit den Scores arbeiten...
-            } else {
-              console.log(`Invalid currentArray structure for index ${index}:`, currentArray);
-            }
-          } else {
-            console.log(`currentArray is undefined for index ${index}`);
-          }
-        } else {
-          console.log(`Data for index ${index} is undefined`);
-        }
-      }
-      */
-      
-     console.log(labels);
-     if (boxesIndexisCompleted && classesIndexisCompleted && scoresIndexisCompleted) {
-      updateBoxesStatus(true);
-      // console.log(boxesIndex,classesIndex,scoresIndex);
-      const boxes = await obj[boxesIndex].array()
-      const classes = await obj[classesIndex].array()
-      const scores = await obj[scoresIndex].array()
+      const boxes = await obj[boxesIndex].array();
+      const classes = await obj[classesIndex].array();
+      const scores = await obj[scoresIndex].array();
     
-      // Draw mesh
+      // draw mesh
       const ctx = canvasRef.current.getContext("2d");
 
-      // 5. TODO - Update drawing utility
-      // drawSomething(obj, ctx)
-        requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], 0.4, videoWidth, videoHeight, ctx, labels)}); 
-      }  
+      // update drawing utility
+        requestAnimationFrame(()=>{drawRect(boxes[0], classes[0], scores[0], ACCURACY, videoWidth, videoHeight, ctx, currenntLabels)}); 
 
-      tf.dispose(img)
-      tf.dispose(resized)
-      tf.dispose(casted)
-      tf.dispose(expanded)
-      tf.dispose(obj)
+      }  
+      
+      // disope
+      tf.dispose(img);
+      tf.dispose(resized);
+      tf.dispose(casted);
+      tf.dispose(expanded);
+      tf.dispose(obj);
 
     }
-  };
-
-  useEffect(()=>{runCoco()},[]);
+  }
 
   return (
     <LabelContext.Provider value={{ labels }}>
-    <div className="App">
-      <header className="App-header">
+    <div className="app"> 
+
+      {isLoading && <LoadingIndicator />}
+      {loadingProgress > 0 && !isLoading && <ProgressCircle progress={loadingProgress} />}
+
+      {displayMessage.hasMessage && <div style={{ backgroundColor: displayMessage.color }}
+        className="message">
+        {displayMessage.message}</div>}
+
+      <div className="header">
+      <h1>Object Detection</h1>
+      </div>
+
+      <div className="liveFeed">
         <Webcam
           ref={webcamRef}
           muted={true} 
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zindex: 9,
-            width: 640,
-            height: 480,
+          className="webcamStyle"
+          style={{  
+            width: `${VIDEO_WIDTH}px`,
+            height: `${VIDEO_HEIGHT}px`
+          }}
+        />
+        <canvas
+          ref={canvasRef}
+          className="canvasStyle"
+          style={{  
+            width: `${VIDEO_WIDTH}px`,
+            height: `${VIDEO_HEIGHT}px`
           }}
         />
 
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: "absolute",
-            marginLeft: "auto",
-            marginRight: "auto",
-            left: 0,
-            right: 0,
-            textAlign: "center",
-            zindex: 8,
-            width: 640,
-            height: 480,
-          }}
-        />
-        <div className="StatusIndicatorHelper">
-          <StatusIndicator label="Model" status={modelLoaded} />
-          <StatusIndicator label="Boxes Assigned" status={boxesAssigned} />
-        </div>
+      </div>
+      <div className="statusIndicator">
+        <StatusIndicator label="Model" status={modelLoaded} />
+        <StatusIndicator label="Boxes Assigned" status={boxesAssigned} />
+      </div>
+
+      <div className="labelList">
         <LabelList changeColor={changeColor}/>
-      </header>
+      </div>
+
+      <div className="footer">
+      <p>© 2024 Dirk Hofmann. <a href="https://git.ai.fh-erfurt.de/ma4163sp1/ba_project/ss23/ba_project_ss23_hofmann" target="_blank" rel="noopener noreferrer" className="FooterLink">GitLab.</a></p>
+      </div>
     </div>
     </LabelContext.Provider>
   );

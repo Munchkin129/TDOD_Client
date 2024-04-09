@@ -1,0 +1,20 @@
+.progressCircle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  }
+  
+  .progressBack {
+    stroke: rgba(0, 0, 0, 0.1);
+  }
+  
+  .progressBar {
+    stroke: #3498db;
+    transition: stroke-dashoffset 0.5s ease-out;
+  } 

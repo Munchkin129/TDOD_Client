@@ -1,0 +1,157 @@
+.app {  
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-rows: 1fr 2fr 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "Header Header Header"
+    "StatusIndicator LiveFeed LabelList"
+    "Footer Footer Footer";
+  text-align: center;
+  justify-content: center;
+  background: rgb(2,0,36);
+  background: radial-gradient(circle, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  animation: pulseCircle 5s infinite ease-in-out;
+  font-family: 'Open Sans', sans-serif;
+  height: 100vh;
+}
+
+.header { 
+  grid-area: Header; 
+  width: 100%;
+  padding: 20px 0;
+  color: #f6f686;
+  text-align: center;
+  font-size: 24px;
+}
+
+.liveFeed {
+  grid-area: LiveFeed; 
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  height: 100%;
+}
+
+.webcamStyle, .canvasStyle {
+  position: absolute;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.webcamStyle {
+  z-index: 8;
+}
+
+.canvasStyle {
+  z-index: 9;
+}
+
+.statusIndicator {
+  grid-area: StatusIndicator; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  z-index: 10;
+  font-size: 25px;
+  padding: 10px; 
+}
+
+.labelList { 
+  grid-area: LabelList;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; 
+  z-index: 10;
+  font-size: 25px;
+  padding: 10px;
+}
+
+.label, .statusIndicator div {
+  padding: 10px 20px;
+  margin: 10px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: #FDF7FA; 
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+  transition: background-color 0.3s; 
+  margin-bottom: 5px; 
+}
+
+.label {
+cursor: pointer; 
+}
+
+.label:hover, .statusIndicator div:hover {
+  background: #ececec; 
+}
+
+.message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  animation: fadeOut 5s forwards;
+}
+
+.footer { 
+  grid-area: Footer;
+  width: 100%;
+  padding: 10px 0;
+  background: #090979;
+  color: white;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+
+.footerLink{
+  color: #007bff;
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes pulseCircle {
+  0%, 100% {
+    background-size: 100% 100%;
+  }
+  50% {
+    background-size: 120% 120%;
+  }
+}
+
+@media (max-width: 1249px) {
+  .StatusIndicator, .label-list {
+    display: none;
+  }
+}
