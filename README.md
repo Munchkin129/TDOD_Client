@@ -435,14 +435,31 @@ Durch die Zunahme von Bildern in verschiedenen Handpositionen, Entfernungen und 
 <details>
 <summary>Webseite schreiben und Model anbinden</summary>
 
-1. Model hosten
-   mehrere Möglichkeiten, habe mich zum lokalen hosten entschieden mittels http server (https://www.npmjs.com/package/http-server)
+### Model hosten
 
-   individuelle Challenge: jedes geladene Model sendet 8 Arrays in verschiedener Reihenfolge
+Um das Model lokal zu hosten wird das [http-server-Paket](https://www.npmjs.com/package/http-server) genutzt.
+
+Installation per Befehl.
+
+<pre>npm install -g http-server</pre>
+
+Gestartet wird der Server aus dem lokalen Verzeichnis, in dem das Model liegt mittels Befehl.
+
+<pre>http-server -c1 --cors .</pre>
+
+Das Model kann dann über folgenden Code geladen werden.
+
+<pre>const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');</pre>
+
+Die model.json Datei enthält Metadaten über das Modell, einschließlich der Struktur des neuronalen Netzwerks und Verweise auf weitere Dateien, die die trainierten Gewichte des Modells enthalten (die .bin-Dateien).
+   
+### Zuordnen von Boxen, Klassen und Scores
 
    Wir brauchen Boxes, Classes und Scores und müssen diese richtig zuordnen. Dafür habe ich einen Algorithmus geschrieben
    
 Beim Laden des Models im Client-Browser wird zuerst die model.json-Datei abgerufen, um die Modelstruktur zu konstruieren. Anschließend werden die zugehörigen Gewichte aus den .bin-Dateien geladen, um das Model zu vervollständigen und inferenzbereit zu machen.
+
+###
 
 3. Webcam für live Feed
 
