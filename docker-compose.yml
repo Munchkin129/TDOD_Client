@@ -1,0 +1,17 @@
+version: '3'
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - model-server
+
+  model-server:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"

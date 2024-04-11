@@ -21,7 +21,7 @@ import {drawRect} from "./utilities/utilities";
 // important constants
 const VIDEO_WIDTH = 640;
 const VIDEO_HEIGHT = 480;
-const DETECTION_INTERVAL = 16.7;
+const DETECTION_INTERVAL = 16.7; // in ms
 const ACCURACY = 0.7;
 
 // model host
