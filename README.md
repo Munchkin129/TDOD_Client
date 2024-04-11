@@ -574,13 +574,15 @@ Labels können leicht im Code angepasst werden und werden dynamisch angezeigt.
 
 ### Ändern der Farbe der Labels
 
+Auf das Label klicken, bei der die Anzeigefarbe geändert werden soll.
+
 ![changeLabelcolor](/documentation/pictures/changeLabelcolor.png)
+
+Es erscheint ein Fenster in dem die neue Farbe eingegeben werden kann. Dies kann mittels des englischen Wortes, dem HEX oder RGB Wert passieren.
 
 ![changeLabelcolorDialog](/documentation/pictures/changeLabelcolorDialog.png)
 
 ![changeLabelcolorAfter](/documentation/pictures/changeLabelcolorAfter.png)
-
-TODO
 
 ### LoadingIndicator-Komponente (LoadingIndicator.js)
 
