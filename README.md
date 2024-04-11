@@ -3,17 +3,40 @@
 ## Starten der Webseite und des Models
 <details open>
 <summary>Schritte zum Starten des Projekts</summary>
-<ol>
-<li><strong>Dependencies installieren</strong></li>
-  <p>In der Konsole: <br>
-  <pre>npm install</pre></p>
-<li><strong>Webseite starten</strong></li>
-  <p>In der Konsole: <br>
-  <pre>npm start </pre></p>
-<li><strong>Model lokal hosten</strong></li>
-  <p>In den Ordner des zu hostenden Models gehen, Konsole öffnen und http Server starten:<br>
-    <pre>http-server -c1 --cors .</pre></p>
-</ol>
+
+### In der Testumgebung
+ 
+**Dependencies installieren**
+
+In der Konsole:
+
+<pre>
+npm install
+</pre>
+
+**Webseite starten**
+
+In der Konsole:
+
+<pre>
+npm start
+</pre>
+
+**Model lokal hosten**
+
+In den Ordner des zu hostenden Models gehen, Konsole öffnen und http Server starten:
+
+<pre>
+http-server -c1 --cors .
+</pre>
+
+### Im Dockercontainer
+
+In root-Verzeichnis des Projekts:
+<pre>
+docker-compose up --build
+</pre>
+    
 </details>
 
 ## Durchführung der einzelnen Schritte
