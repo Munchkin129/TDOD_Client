@@ -647,4 +647,120 @@ Die Anwendung nutzt CSS für das Styling der Komponenten und des Layouts. Die Ha
 
 <details>
 <summary>3. Projekt in einen Docker Container umsiedeln</summary>
+
+## Docker Dokumentation
+
+Das Projekt umfasst zwei seperat laufende Applikationen, weshalb auch zwei Dockercontainer verwendet werden.
+
+Um diese zu verbinden wird eine YAML Datei benutzt.
+
+### Server Dockerfile
+
+Liegt im *models* Ordner. Um das benutze Model zu ändern, muss der erste Ordnerpfad nach dem Copy geändert werden.
+
+Auf dem Port 8080 kann auf Model zugegriffen werden.
+
+<pre>
+FROM node:14
+
+RUN npm install -g http-server
+
+WORKDIR /model
+
+COPY /tfjsexportmy_ssd_mobnet_tuned_v4 ./
+
+EXPOSE 8080
+
+CMD [ "http-server", "-c1", "--cors", "." ]
+</pre>
+
+### React App Dockerfile
+
+Hier wird die React App gebaut und auf Port 3000 zur Verfügung gestellt.
+
+<pre>
+FROM node:14
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+RUN npm install -g serve
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "build", "-l", "3000"]
+ </pre>
+
+ ### YAML Datei
+
+Die YAML Datei verbindet die beiden Docker Container und die Webseite kann auf das Model zugreifen.
+
+<pre>
+version: '3'
+services:
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - model-server
+
+  model-server:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+</pre>
+
+Beide Container können nun mit einem Befehl aus der YAML Datei gestartet werden.
+
+<pre>
+docker-compose up --build
+</pre>
+ 
+</details>
+
+## Ausblick und Lessons Learned
+
+<details>
+<summary>Ausblick</summary>
+
+### Performanse der Webseite verbessern
+
+Durch Optimierungen kann die Reaktionsfähigkeit der Webseite erhöht werden.
+
+### Foto-Erkennung implementieren
+
+Die Möglichkeit Fotos erkennen zu lassen erweitert die Funktionalität der Anwendung.
+
+### Model weiter verfeinern
+
+Das Model weiter trainieren und angepassen, um die Genauigkeit und Zuverlässigkeit der Vorhersagen zu erhöhen.
+ 
+</details>
+
+<details>
+<summary>Lessons learned</summary>
+
+### Deadlines setzen
+
+Das setzen von Deadlines hilft die Ziele umzusetzen.
+
+### Ziele genau definieren
+
+Genau definierte Ziele helfen dabei das Projekt voran zu bringen und sich nicht zu verlieren.
+
+### Aller Anfang ist schwer
+
+Tensorflow bietet sehr viele Möglichkeiten und einen richtigen Einsteig zu finden dauert Zeit. [Tutorials](https://youtu.be/yqkISICHH-U?si=lTONW8VKqncgjjxg) von NicholasRenotte haben diesen Erleichtert.
+ 
 </details>
