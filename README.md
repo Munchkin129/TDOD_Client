@@ -3,17 +3,40 @@
 ## Starten der Webseite und des Models
 <details open>
 <summary>Schritte zum Starten des Projekts</summary>
-<ol>
-<li><strong>Dependencies installieren</strong></li>
-  <p>In der Konsole: <br>
-  <pre>npm install</pre></p>
-<li><strong>Webseite starten</strong></li>
-  <p>In der Konsole: <br>
-  <pre>npm start </pre></p>
-<li><strong>Model lokal hosten</strong></li>
-  <p>In den Ordner des zu hostenden Models gehen, Konsole öffnen und http Server starten:<br>
-    <pre>http-server -c1 --cors .</pre></p>
-</ol>
+
+### In der Testumgebung
+ 
+**Dependencies installieren**
+
+In der Konsole:
+
+<pre>
+npm install
+</pre>
+
+**Webseite starten**
+
+In der Konsole:
+
+<pre>
+npm start
+</pre>
+
+**Model lokal hosten**
+
+In den Ordner des zu hostenden Models gehen, Konsole öffnen und http Server starten:
+
+<pre>
+http-server -c1 --cors .
+</pre>
+
+### Im Dockercontainer
+
+In root-Verzeichnis des Projekts:
+<pre>
+docker-compose up --build
+</pre>
+    
 </details>
 
 ## Durchführung der einzelnen Schritte
@@ -433,26 +456,194 @@ Durch die Zunahme von Bildern in verschiedenen Handpositionen, Entfernungen und 
 </details>
 
 <details>
-<summary>Webseite schreiben und Model anbinden</summary>
+<summary>Model hosten und Webseite bauen</summary>
 
-1. Model hosten
-   mehrere Möglichkeiten, habe mich zum lokalen hosten entschieden mittels http server (https://www.npmjs.com/package/http-server)
+## Objekterkennungsanwendung Dokumentation
 
-   individuelle Challenge: jedes geladene Model sendet 8 Arrays in verschiedener Reihenfolge
+### Grundlage
 
-   Wir brauchen Boxes, Classes und Scores und müssen diese richtig zuordnen. Dafür habe ich einen Algorithmus geschrieben
+Die Grundlage ist eine React Webseite. TensorFlow.js und die React-Webcam-Komponente werden genutzt um Objekterkennung in Echtzeit durchzuführen. 
+
+Erkannte Objekte auf einem Videofeed der Webcam an und bietet Benutzern die Möglichkeit, die Darstellung der Erkennungen anzupassen.
+
+Das gehosteten Model kann leicht ausgetauscht werden.
+
+## Grundaufgabe
+
+### Model hosten
+
+Um das Model lokal zu hosten wird das [http-server-Paket](https://www.npmjs.com/package/http-server) genutzt.
+
+Installation per Befehl.
+
+<pre>npm install -g http-server</pre>
+
+Gestartet wird der Server aus dem lokalen Verzeichnis, in dem das Model liegt mittels Befehl.
+
+<pre>http-server -c1 --cors .</pre>
+
+Das Model kann dann über folgenden Code geladen werden.
+
+<pre>const net = await tf.loadGraphModel('http://127.0.0.1:8080/model.json');</pre>
+
+Die model.json Datei enthält Metadaten über das Modell, einschließlich der Struktur des neuronalen Netzwerks und Verweise auf weitere Dateien, die die trainierten Gewichte des Modells enthalten (die .bin-Dateien).
+
+### Zuordnen von Boxen, Klassen und Scores
+
+Das Model sendet acht verschiedene Arrays, für die Zuordnung und Erkennung sind für uns **Bounding Boxes**, **Klassenindizes** und **Scores** interessant.
+
+Diese haben keine feste Zuordnung und sind bei jedem Model anders angeordnet. Es kann z.B. sein, dass sich die **Scores** bei ModelA in Array[0] und bei ModelB in Array[5] sind.
    
-Beim Laden des Models im Client-Browser wird zuerst die model.json-Datei abgerufen, um die Modelstruktur zu konstruieren. Anschließend werden die zugehörigen Gewichte aus den .bin-Dateien geladen, um das Model zu vervollständigen und inferenzbereit zu machen.
+Deshalb müssen diese richtig zugeodrnet werden. Dies geschieht im Code
 
-3. Webcam für live Feed
+<pre>
+ if ((Number.isInteger(firstElement[0])) && (Number.isInteger((firstElement[50]))) && ((firstElement[0]) <= numberOfLabels) && ((firstElement[50]) <= numberOfLabels) && (!classesIndexisCompleted)) {
+              console.log("classes: ", i);
+              classesIndex = i;
+              classesIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else if (((firstElement[0] >= 0) && (firstElement[0] <= 1)) && ((firstElement[50] >= 0) && (firstElement[50] <= 1)) && (!scoresIndexisCompleted)) {
+              console.log("scores: ", i);
+              scoresIndex = i;
+              scoresIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            } else if (firstElement[0].length === 4 && !boxesIndexisCompleted) {
+              console.log("boxes: ", i);
+              boxesIndex = i;
+              boxesIndexisCompleted = true;
+              setLoadingProgress(currentProgress => currentProgress + 33);
+            }
+</pre>
 
-4. Canvas für die Liveauswertung
+Die **Classes** sind immer Integer.
+
+Die **Scores** sind positive Gleitkommazahlen,.
+
+Die **Boxes** haben genau vier Einträge.
+
+### Erfassen des Bildes von der Webcam und Vorbereiten für das Modell
+
+<pre>
+  const video = webcamRef.current.video
+  
+  const img = tf.browser.fromPixels(video);
+  const resized = tf.image.resizeBilinear(img, [640, 480]);
+  const casted = resized.cast('int32');
+  const expanded = casted.expandDims(0);
+</pre>
+
+### Ausführen des Modells und Erhalten der Vorhersagen
+
+<pre>
+  const obj = await net.executeAsync(expanded);
+</pre>
+
+### Visualisierung
+
+Die Visualisierung findet durch die drawRect Funktion in utilities.js statt.
 
 5. Extra Features: Label werden anhand deren Anzahl geladen und können per Farbe verändert werden 
 
-</details>
+<pre>
+  export const drawRect = (boxes, classes, scores, threshold, imgWidth, imgHeight, ctx, labelMap)=>{
+        for(let i=0; i<=boxes.length; i++){
+        if(boxes[i] && classes[i] && scores[i]>threshold){
+            // extract variables
+            const [y,x,height,width] = boxes[i]
+            const text = classes[i]
+            
+            // styling
+            ctx.strokeStyle = labelMap[text]['color']
+            ctx.lineWidth = 10
+            ctx.fillStyle = 'white'
+            ctx.font = '30px Arial'         
+            
+            // drawing
+            ctx.beginPath()
+            ctx.fillText(labelMap[text]['name'] + ' - ' + Math.round(scores[i]*100)/100, x*imgWidth, y*imgHeight-10)
+            ctx.rect(x*imgWidth, y*imgHeight, width*imgWidth/2, height*imgHeight/2);
+            ctx.stroke()
+        }
+    }
+}
+</pre>
 
-## Tutroial eigenes Model anbinden
+Es werden alle Erkennungen, die über dem mitgegeben *threshold* sind auf einem Canvas gezeichnet. 
+
+Dazu wird über der gezeichneten Box noch das Label mit dem zugehörigen Score angezeigt.
+
+## Weitere Features
+
+### Kontextverwaltung
+
+Mit LabelContext verwaltet die Anwendung globalen Zustand für die Labels. Dies ermöglicht eine einfache Zugriffs- und Aktualisierungsmöglichkeit der Labeldaten über die gesamte Anwendung hinweg.
+
+### LabelList-Komponente (LabelList.js)
+
+Ermöglicht die Anzeige und Anpassung der Labelnamen und -farben auf der rechten Seite der Webseite. Nutzt den LabelContext, um auf die aktuellen Labels zuzugreifen und bietet eine interaktive Schnittstelle zur Farbanpassung durch Klicken auf ein Label.
+
+Labels können leicht im Code angepasst werden und werden dynamisch angezeigt.
+
+<pre>
+  const [labels, setLabels] = useState({
+    1: {name: 'FirstLabel', color: 'green'},
+    2: {name: 'SecondLabel', color: '#000000'},
+    3: {name: 'ThirdLabel', color: 'rgb(255, 0, 0)'},
+    4: {name: 'FourthLabel', color: 'blue'}
+  });
+</pre>
+
+![labelsWebsite](/documentation/pictures/labelsWebsite.png)
+
+### Ändern der Farbe der Labels
+
+Auf das Label klicken, bei der die Anzeigefarbe geändert werden soll.
+
+![changeLabelcolor](/documentation/pictures/changeLabelcolor.png)
+
+Es erscheint ein Fenster in dem die neue Farbe eingegeben werden kann. Dies kann mittels des englischen Wortes, dem HEX oder RGB Wert passieren.
+
+![changeLabelcolorDialog](/documentation/pictures/changeLabelcolorDialog.png)
+
+![changeLabelcolorAfter](/documentation/pictures/changeLabelcolorAfter.png)
+
+### LoadingIndicator-Komponente (LoadingIndicator.js)
+
+Zeigt einen Ladeindikator für User Feedback an, während das Modell geladen wird. Visualisiert den Ladezustand durch einen animierten Spinner.
+
+### ProgressCircle-Komponente (ProgressCircle.js)
+
+Visualisiert den Fortschritt der Zuweisung von Bounding Boxes, Klassenindizes und Scores durch einen sich füllenden Kreis.
+
+### Messages
+
+Um weiteres visuelles Feedback zu geben können kleine Nachrichten auf verschiedenen Hintergründen angezeigt werden, welche nach fünf Sekunden wieder verschwinden.
+
+<pre>
+  useEffect(() => {
+    if (displayMessage.hasMessage) {
+      const timer = setTimeout(() => {
+        setDisplayMessage({ hasMessage: false, message: "" , color: ""});
+      }, 5000);    
+      return () => clearTimeout(timer);
+      }
+  }, [displayMessage.hasMessage]);
+</pre>
+
+Hier ein kompletter Vorgang mit LoadingIndicator und ProgressCircle und Mesages.
+
+![gif of loading the model and arrays](/documentation/pictures/LoadingProzzes.gif)
+
+### StatusIndicator-Komponente (StatusIndicator.js)
+
+Bietet dauerhaftes visuelles Feedback über den Ladezustand des Modells und die Zuweisung der Arrays auf der linken Seite der Webseite. Zeigt an, ob das Modell geladen wurde und ob die Objektboxen erfolgreich zugewiesen wurden.
+
+![StatusIndicator](/documentation/pictures/StatusIndicator.png)
+### Styling
+
+Die Anwendung nutzt CSS für das Styling der Komponenten und des Layouts. Die Hauptstyle-Datei ist App.css, welche allgemeine Styles und Layoutanpassungen definiert.
+
+</details>
 
 <details>
 <summary>3. Projekt in einen Docker Container umsiedeln</summary>
